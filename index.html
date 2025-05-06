@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Soumya Savarn | Portfolio</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      background: #f8f9fa;
+      transition: background-color 0.5s;
+    }
+    /* Sidebar styles */
+    .sidenav {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      z-index: 2;
+      top: 0;
+      left: 0;
+      background: linear-gradient(135deg, #232526 0%, #414345 100%);
+      overflow-x: hidden;
+      transition: 0.5s;
+      padding-top: 60px;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+      color: #fff;
+    }
+    .sidenav .closebtn {
+      position: absolute;
+      top: 18px;
+      right: 25px;
+      font-size: 36px;
+      cursor: pointer;
+      color: #fff;
+      transition: color 0.3s;
+    }
+    .sidenav .closebtn:hover {
+      color: #ffb347;
+    }
+    .sidenav h2 {
+      margin: 0 0 20px 32px;
+      font-size: 2em;
+      letter-spacing: 1px;
+      color: #ffb347;
+    }
+    .sidenav .about {
+      margin: 0 32px 32px 32px;
+      font-size: 1.05em;
+      line-height: 1.7;
+      color: #f1f1f1;
+    }
+    .sidenav .sidebar-links {
+      margin: 0 32px;
+    }
+    .sidenav .sidebar-links a {
+      display: block;
+      color: #f1f1f1;
+      padding: 12px 0;
+      text-decoration: none;
+      font-size: 1.1em;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: color 0.2s, background 0.2s;
+    }
+    .sidenav .sidebar-links a:hover {
+      color: #ffb347;
+      background: rgba(255,255,255,0.05);
+    }
+    /* Profile photo */
+    .profile-photo {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      margin: 0 auto 25px auto;
+      display: block;
+      object-fit: cover;
+      border: 3px solid #ffb347;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    /* Main content */
+    #main {
+      transition: margin-left .5s;
+      padding: 32px 12vw 32px 18vw; /* Changed padding to push content right */
+      margin-left: 0;
+    }
+    .openbtn {
+      font-size: 28px;
+      cursor: pointer;
+      background: #232526;
+      color: #ffb347;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 0 8px 8px 0;
+      position: fixed;
+      top: 24px;
+      left: 0;
+      z-index: 3;
+      transition: background 0.2s;
+    }
+    .openbtn:hover {
+      background: #414345;
+    }
+    /* Section styles */
+    .section {
+      margin-bottom: 60px;
+    }
+    .section-title {
+      font-size: 2em;
+      color: #232526;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #ffb347;
+      display: inline-block;
+    }
+    /* Blog and project card styles */
+    .card-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      margin-top: 32px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      padding: 28px;
+      flex: 1 1 320px;
+      min-width: 320px;
+      max-width: 480px;
+      transition: box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card:hover {
+      box-shadow: 0 4px 32px rgba(0,0,0,0.15);
+    }
+    .card-title {
+      font-size: 1.35em;
+      color: #232526;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .card-meta {
+      font-size: 0.98em;
+      color: #888;
+      margin-bottom: 16px;
+    }
+    .card-content {
+      font-size: 1.08em;
+      color: #333;
+      line-height: 1.7;
+      flex: 1;
+    }
+    /* Social links styles */
+    .social-links {
+      display: flex;
+      gap: 20px;
+      margin-top: 15px;
+    }
+
+    .social-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: #232526;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .social-link:hover {
+      background: #414345;
+      color: #ffb347;
+      transform: translateY(-2px);
+    }
+    /* Add to your existing styles */
+    .card-links {
+      margin-top: auto;
+      padding-top: 20px;
+    }
+
+    .github-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #232526;
+      text-decoration: none;
+      font-size: 0.9em;
+    }
+
+    .github-link:hover {
+      color: #ffb347;
+    }
+
+    .read-more-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #232526;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      margin-top: 20px;
+      transition: all 0.2s;
+    }
+
+    .read-more-btn:hover {
+      background: #414345;
+      color: #ffb347;
+      transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      #main {
+        padding: 24px 5vw 24px 10vw; /* Adjusted for mobile */
+      }
+      .card-list {
+        flex-direction: column;
+        gap: 24px;
+      }
+    }
+    @media (max-width: 600px) {
+      .card {
+        max-width: 100%;
+        min-width: 0;
+        padding: 18px;
+      }
+      #main {
+        padding: 24px 5vw 18px 8vw; /* Further adjusted for smaller screens */
+      }
+      .sidenav {
+        padding-top: 60px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div id="mySidenav" class="sidenav">
+  <span class="closebtn" onclick="closeNav()">&times;</span>
+  <img src="com-min.jpg" alt="Soumya Savarn" class="profile-photo">
+  <h2>About Me</h2>
+  <div class="about">
+    Hi, I'm <b>Soumya Savarn</b>, a junior at IIT Guwahati, pursuing a B.Tech in Data Science and Artificial Intelligence. I have a keen interest in deep learning, especially generative models and web development. I also explore selective topics in Computer Science through my B.Tech minor course.
+  </div>
+  <div class="sidebar-links">
+    <a href="#main">Home</a>
+    <a href="#blogs">Blogs</a>
+    <a href="#projects">Projects</a>
+    <a href="#work-experience">Work Experience</a>
+    <a href="#contact">Contact</a>
+  </div>
+</div>
+
+<!-- Open Sidebar Button -->
+<button class="openbtn" onclick="openNav()">&#9776; </button>
+
+<!-- Main Content -->
+<div id="main">
+  <h1>Welcome to My Portfolio</h1>
+  <p>Explore my work, read my latest blogs, and get in touch!</p>
+
+  <!-- Blogs Section -->
+  <div id="blogs" class="section">
+    <h2 class="section-title">Blogs</h2>
+    <div class="card-list">
+      <!-- Blog 1: Autoencoders -->
+      <div class="card">
+        <div class="card-title">Everything about Autoencoders: From Linear Algebra to its multimodal and crossmodal generative capabilities using VAEs</div>
+        <div class="card-meta">May 2025 • Multimodal Unsupervised Learning</div>
+        <div class="card-content">
+          Autoencoders are a type of artificial neural network used for unsupervised learning. Their primary goal is to learn efficient representations of input data, typically for dimensionality reduction or noise removal. However, there is a lot more inherent in its architecture<br><br>
+          <i>Key takeaway: [20 mins read]</i> You will learn about its origin to its state of art usages. I will take from the era of 1990 to 2020.
+        </div>
+        <div class="card-links">
+          <a href="autoencoder-blog.html" class="read-more-btn">Read Full Article</a>
+        </div>
+      </div>
+    </div>
+  </div>
+      <!-- Blog 2 -->
+      
+
+  <!-- Projects Section -->
+<!-- Projects Section -->
+<div id="projects" class="section">
+  <h2 class="section-title">Projects</h2>
+  <div class="card-list">
+    <!-- Project 1 (keep your existing first project) -->
+    <div class="card">
+      <div class="card-title">Synthetic Dataset Generation using CGANs <a href="https://github.com/soumyasavarn" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg></a></div>
+      <div class="card-meta">April 2025 • Python, Pytorch, Streamlit</div>
+      <div class="card-content">
+        Developed two Conditional Generative Adversarial Networks, first one is CTGAN for tabular data and second one is Pix2Pix for image data to comic face. The project includes a web application for generating synthetic datasets using these models. The CTGAN model trains on the fly and generates synthetic data, while the Pix2Pix model is trained on NVIDIA P100 GPU for 9.5 hours on the Comic Face Dataset on Kaggle. The web app allows users to upload images and download generated datasets.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Campus Collab <a href="https://fontend-campus-collab-h33gd08s2-soumyasavarns-projects.vercel.app/login" target="_blank" class="deployed-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-globe" viewBox="0 0 16 16">
+          <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm7.5-6.923c-.67.204-1.335.82-1.887 1.855A7.97 7.97 0 0 0 5.145 4H7.5V1.077zM4.09 4a9.267 9.267 0 0 1 .64-1.539 6.7 6.7 0 0 1 .597-.933A7.025 7.025 0 0 0 2.255 4H4.09zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a6.958 6.958 0 0 0-.656 2.5h2.49zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5H4.847zM8.5 5v2.5h2.99a12.495 12.495 0 0 0-.337-2.5H8.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5H4.51zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5H8.5zM5.145 12c.138.386.295.744.468 1.068.552 1.035 1.218 1.65 1.887 1.855V12H5.145zm.182 2.472a6.696 6.696 0 0 1-.597-.933A9.268 9.268 0 0 1 4.09 12H2.255a7.024 7.024 0 0 0 3.072 2.472zM3.82 11a13.652 13.652 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5H3.82zm6.853 3.472A7.024 7.024 0 0 0 13.745 12H11.91a9.27 9.27 0 0 1-.64 1.539 6.688 6.688 0 0 1-.597.933zM8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855.173-.324.33-.682.468-1.068H8.5zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.65 13.65 0 0 1-.312 2.5zm2.802-3.5a6.959 6.959 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5h2.49zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7.024 7.024 0 0 0-3.072-2.472c.218.284.418.598.597.933zM10.855 4a7.966 7.966 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4h2.355z"/>
+        </svg>
+      </a>
+      <a href="https://github.com/Tanmay7404/Campus_Collaboration_Kapili" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg></a></div>
+      <div class="card-meta">Kriti - Inter Hostel Tech Event, IIT Guwahati • Jan. 2024 - Feb. 2024 • MongoDB, Express.js, React.js, Node.js, Figma</div>
+      <div class="card-content">
+        A web platform for campus students to find collaborators for their projects or a project to work on.      
+        Implemented major dynamic content in the frontend using React.js, reducing codebase and response time.
+        Implemented a spam filtering algorithm using a heuristic criterion and reduced time taken by 67 ms per message.
+      </div>
+                
+      </div>
+
+    <div class="card">
+      <div class="card-title">Army Database <a href="https://github.com/soumyasavarn/Army-Database" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg></a></div>
+      <div class="card-meta">May 2024 • Database Design, Streamlit, SQL</div>
+      <div class="card-content">
+        A database design project for an Indian Army Camp, North Guwahati that supports daily local transactions in a single place while maintaining ACID properties. This system helps manage personnel, equipment, and operations data efficiently.
+      </div>
+    </div>
+
+    <!-- Project 2: FitAI -->
+    <div class="card">
+      <div class="card-title">FitAI <a href="https://github.com/soumyasavarn/FitAI" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg></a></div>
+      <div class="card-meta">April 2024 • Python, Flask, GenAI</div>
+      <div class="card-content">
+        A fitness tracker and predictor application that uses both generative AI and classical ML algorithms for fitness-related predictions. Features include activity tracking, goal setting, and predictive analysis. Deployed and accessible online as of February 2025.
+      </div>
+    </div>
+    
+    <!-- Project 3: DSA -->
+    <div class="card">
+      <div class="card-title">Data Structures & Algorithms <a href="https://github.com/soumyasavarn/DSA" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg></a></div>
+      <div class="card-meta">December 2023 • C++, Algorithms</div>
+      <div class="card-content">
+        A comprehensive collection of self-implemented data structures and algorithms. This repository serves as both a learning resource and reference implementation for various computer science concepts.
+      </div>
+    </div>
+    
+    <!-- Project 4: Real-Estate-Search-System -->
+    <div class="card">
+      <div class="card-title">Real Estate Search System <a href="https://github.com/soumyasavarn/Real-Estate-Search-System" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg></a></div>
+      <div class="card-meta">December 2023 • C++</div>
+      <div class="card-content">
+        A real estate property search and management system implemented in C++. This application allows users to search, filter, and manage real estate listings with an efficient search algorithm.
+      </div>
+    </div>
+    
+    <!-- Project 5: Terminal-based-Text-Editor -->
+    <div class="card">
+      <div class="card-title">Terminal-based Text Editor <a href="https://github.com/soumyasavarn/Terminal-based-Text-Editor" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg></a></div>
+      <div class="card-meta">December 2023 • C++, Data Structures</div>
+      <div class="card-content">
+        A basic terminal-based text editor similar to Vim, implemented from scratch in C++ using pointers and linked list data structures. This project demonstrates low-level text manipulation and editor functionality.
+      </div>
+    </div>
+    
+    <!-- Project 6: Army-Database -->
+
+   
+</div>
+
+
+<div id="work-experience" class="section">
+  <h2 class="section-title">Work Experience</h2>
+  <div class="card-list">
+    <div class="card">
+      <div class="card-title">Microsoft </div>
+      <div class="card-meta">SWE internship • May 2025 - July 2025 </div>
+      <div class="card-content">Comming soon .</div>
+    </div>
+
+
+
+   
+</div>
+
+<!-- Contact Section with Social Icons -->
+<div id="contact" class="section">
+  <h2 class="section-title">Contact</h2>
+  <p>Feel free to reach out to me at <a href="mailto:soumyasavarn2@gmail.com">soumyasavarn2@gmail.com</a></p>
+    
+  <div style="margin-top: 20px; display: flex; gap: 20px;">
+    <!-- GitHub Icon -->
+    <a href="https://github.com/soumyasavarn" target="_blank" style="text-decoration: none;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/>
+      </svg>
+    </a>
+    
+    <!-- LinkedIn Icon -->
+    <a href="https://linkedin.com/in/soumya-savarn-3483b2165" target="_blank" style="text-decoration: none;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 11v5" />
+        <path d="M8 8v.01" />
+        <path d="M12 16v-5" />
+        <path d="M16 16v-3a2 2 0 1 0 -4 0" />
+        <path d="M3 7a4 4 0 0 1 4 -4h10a4 4 0 0 1 4 4v10a4 4 0 0 1 -4 4h-10a4 4 0 0 1 -4 -4z" />
+      </svg>
+    </a>
+    
+    <!-- Quora Icon (simplified version) -->
+    <a href="https://www.quora.com/profile/" target="_blank" style="text-decoration: none;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#A82400">
+        <path d="M12.53 2C6.96 2 6.27 6.24 6.27 9.52c0 2.4.71 4.83 2.13 6.48-1.47.36-3.8 1.22-3.8 2.91 0 1.67 2.74 1.33 3.96 1.11-.71 1.3-3.11 2.93-3.11 4.62 0 2.67 3.4 3.36 5.73 3.36 3.31 0 6.24-1.56 6.24-4.4 0-2.27-1.87-3.51-3.96-4.31.8-1.02 1.42-2.16 1.87-3.38.98.29 1.82.71 2.69.71 4.36 0 5.98-3.47 5.98-6.93C24 4.4 20.67 2 16.13 2h-3.6zm-.62 3.11c1.11 0 1.87.98 1.87 3.36 0 2.38-.76 3.36-1.87 3.36s-1.87-.98-1.87-3.36c0-2.38.76-3.36 1.87-3.36zm1.96 15.29c1.07 0 1.96.53 1.96 1.33 0 .8-.89 1.33-1.96 1.33s-1.96-.53-1.96-1.33c0-.8.89-1.33 1.96-1.33z"/>
+      </svg>
+    </a>
+  </div>
+</div>
+
+      
+
+  
+
+<script>
+  function openNav() {
+    document.getElementById("mySidenav").style.width = "340px";
+    document.getElementById("main").style.marginLeft = "340px";
+    document.body.style.backgroundColor = "rgba(0,0,0,0.04)";
+  }
+  function closeNav() {
+    document.getElementById("mySidenav").style.width = "0";
+    document.getElementById("main").style.marginLeft = "0";
+    document.body.style.backgroundColor = "#f8f9fa";
+  }
+</script>
+</body>
+</html>

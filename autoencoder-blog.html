@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+ <html lang="en">
+  <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width,initial-scale=1.0"> <title>Understanding Autoencoders | Soumya Savarn</title> 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tensorflow@2.8.0/dist/tf.min.js"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script> 
+  <style> :root { --primary-color: #232526; --accent-color: #ffb347; --bg-color: #f8f9fa; --text-color: #333; --light-text: #666; --card-bg: #fff; --code-bg: #f1f1f1; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    background: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.8;
+  }
+  
+  .back-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    color: var(--primary-color);
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: color 0.2s;
+    font-weight: 500;
+    border-radius: 4px;
+    background: rgba(255, 179, 71, 0.1);
+  }
+  
+  .back-btn:hover {
+    color: var(--accent-color);
+    background: rgba(255, 179, 71, 0.2);
+  }
+  
+  .blog-post {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .blog-meta {
+    color: var(--light-text);
+    margin: 16px 0 32px;
+    font-size: 0.95em;
+  }
+  
+  .blog-content {
+    line-height: 1.8;
+    font-size: 1.1em;
+  }
+  
+  .blog-content h2 {
+    margin-top: 48px;
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 8px;
+    display: inline-block;
+  }
+  
+  .blog-content h3 {
+    margin-top: 32px;
+    color: var(--primary-color);
+  }
+  
+  .blog-content p {
+    margin-bottom: 24px;
+  }
+  
+  .blog-content img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 24px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  
+  .code-block {
+    background: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 24px 0;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.9em;
+  }
+  
+  .visualization-container {
+    margin: 40px 0;
+    padding: 24px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  }
+  
+  .visualization-controls {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  button, select {
+    padding: 8px 16px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  button:hover {
+    background: #414345;
+  }
+  
+  .highlight {
+    background: rgba(255, 179, 71, 0.2);
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+  
+  .math-formula {
+    background: var(--code-bg);
+    padding: 16px;
+    border-radius: 8px;
+    margin: 24px 0;
+    overflow-x: auto;
+    text-align: center;
+  }
+  
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 2px;
+}
+
+.tab {
+    padding: 8px 16px;
+    background: #f8f9fa;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid #eee;
+    border-bottom: none;
+}
+
+.tab:hover {
+    background: #e9ecef;
+}
+
+.tab.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.code-block {
+    background: var(--code-bg);
+    padding: 16px;
+    border-radius: 4px;
+    margin: 16px 0;
+    font-family: 'Consolas', monospace;
+}
+
+.math-formula {
+    padding: 24px;
+    background: var(--code-bg);
+    border-radius: 4px;
+    margin: 16px 0;
+    overflow-x: auto;
+    text-align: center;
+}
+  
+  .progress-container {
+    height: 20px;
+    width: 100%;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    margin: 16px 0;
+  }
+  
+  .progress-bar {
+    height: 100%;
+    width: 0;
+    background-color: var(--accent-color);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+  
+  .tooltip {
+    position: absolute;
+    padding: 8px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    border-radius: 4px;
+    pointer-events: none;
+    font-size: 0.9em;
+    z-index: 10;
+  }
+  
+  @media (max-width: 768px) {
+    #main {
+      padding: 24px 5vw !important;
+    }
+    
+    .visualization-controls {
+      flex-direction: column;
+    }
+  }
+
+  .comparison-container {
+    margin: 32px 0;
+    background: var(--card-bg);
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 20px;
+    font-size: 0.95em;
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 16px;
+    text-align: left;
+    border: 1px solid #eee;
+}
+
+.comparison-table th {
+    background: var(--primary-color);
+    color: white;
+    font-weight: 500;
+    position: relative;
+}
+
+.comparison-table th:first-child {
+    border-top-left-radius: 8px;
+}
+
+.comparison-table th:last-child {
+    border-top-right-radius: 8px;
+}
+
+.comparison-table tr:last-child td:first-child {
+    border-bottom-left-radius: 8px;
+}
+
+.comparison-table tr:last-child td:last-child {
+    border-bottom-right-radius: 8px;
+}
+
+.comparison-table td {
+    background: white;
+    transition: background-color 0.2s;
+}
+
+.comparison-table tr:nth-child(even) td {
+    background: #f8f9fa;
+}
+
+.comparison-table tr:hover td {
+    background: #f0f0f0;
+}
+
+.comparison-table td:first-child {
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+/* Add responsive styles */
+@media (max-width: 768px) {
+    .comparison-table {
+        font-size: 0.85em;
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+        padding: 12px;
+    }
+}
+  </style> </head> <body> <div id="main" style="padding: 32px 15vw;"> <a href="index.html" class="back-btn">&larr; Back to Home</a>
+  <article class="blog-post">
+    <h1>Everything about Autoencoders: From Linear Algebra to its Multimodal and Crossmodal Generative Capabilities</h1>
+    <div class="blog-meta">May 5, 2025 -  Multimodal Unsupervised Learning -  By Soumya Savarn</div>
+    
+    <div class="blog-content">
+      <h2>Introduction</h2>
+      <p>Autoencoders are a type of artificial neural network used for unsupervised learning. Their primary goal is to learn efficient representations of input data, typically for dimensionality reduction or noise removal. The architecture consists of an <b>encoder</b> that compresses the input, a <b>bottleneck</b> that stores the compressed knowledge, and a <b>decoder</b> that reconstructs the original data from this compressed form.</p>
+      
+      <p>In this blog, we'll explore autoencoders from their mathematical foundations to advanced applications in multimodal learning. We'll also implement interactive visualizations to help you understand how autoencoders work.</p>
+      
+      <h2>Autoencoder vs U-Net: Understanding the Differences</h2>
+      <div class="comparison-container">
+        <p>While both architectures use encoder-decoder structures, they serve different purposes and have key differences:</p>
+        
+        <table class="comparison-table">
+          <tr>
+            <th>Feature</th>
+            <th>Autoencoder</th>
+            <th>U-Net</th>
+          </tr>
+          <tr>
+            <td>Primary Purpose</td>
+            <td>Unsupervised learning, dimensionality reduction, feature learning</td>
+            <td>Supervised segmentation, dense prediction tasks</td>
+          </tr>
+          <tr>
+            <td>Architecture</td>
+            <td>Symmetric encoder-decoder with bottleneck</td>
+            <td>Encoder-decoder with skip connections between corresponding layers</td>
+          </tr>
+          <tr>
+            <td>Information Flow</td>
+            <td>All information passes through bottleneck</td>
+            <td>Features can bypass bottleneck through skip connections</td>
+          </tr>
+          <tr>
+            <td>Output Size</td>
+            <td>Same as input (reconstruction)</td>
+            <td>Can be different from input (segmentation map)</td>
+          </tr>
+          <tr>
+            <td>Training</td>
+            <td>Self-supervised (input = target)</td>
+            <td>Supervised (requires labeled data)</td>
+          </tr>
+        </table>
+      </div>
+      
+      <div class="visualization-container">
+        <h3>Autoencoder Architecture</h3>
+        <img src="autoencoder-architecture.png" alt="Autoencoder Architecture showing encoder, bottleneck, and decoder" class="architecture-img">
+        <p class="img-caption">Basic architecture of an autoencoder showing the encoding and decoding process</p>
+      </div>
+      
+      <h2>Mathematical Foundation</h2>
+      <p>An autoencoder is defined by two main components: an <span class="highlight">encoder function</span> that transforms the input data, and a <span class="highlight">decoder function</span> that recreates the input data from the encoded representation.</p>
+      
+      <p>Formally, for input space $$X$$ and encoded space $$Z$$, we define:</p>
+      <div class="math-formula">
+        $$ \text{Encoder}: f_\phi: X \rightarrow Z $$
+        $$ \text{Decoder}: g_\theta: Z \rightarrow X $$
+      </div>
+      
+      <p>The training objective is to minimize the reconstruction error:</p>
+      <div class="math-formula">
+        $$ \mathcal{L}(\phi, \theta) = \sum_{x \in X} ||x - g_\theta(f_\phi(x))||^2 $$
+      </div>
+      
+      <p>For linear autoencoders, this has an elegant solution related to Principal Component Analysis (PCA). The optimal linear autoencoder learns to project the data onto the principal subspace of the data.</p>
+      
+      <div class="visualization-container">
+        <h2>The <strong>Recirculation Algorithm</strong></h2>
+  <p>
+    The Recirculation Algorithm is an alternative to backpropagation for training neural networks, particularly autoencoders. It was introduced by Geoffrey Hinton and James McClelland in 1987 as a more biologically plausible learning mechanism. 
+    (<a href="https://www.mdpi.com/2227-7390/11/8/1777?utm_source=chatgpt.com" target="_blank">MDPI</a>)
+  </p>
+
+  <h3> Key Reference</h3>
+  <ul>
+    <li>
+      <strong>Hinton, G.E., & McClelland, J.L. (1987).</strong> 
+      <em>Learning Representations by Recirculation</em>. 
+      In <em>Proceedings of the Neural Information Processing Systems</em>, Denver, CO, USA. MIT Press: Cambridge, MA, USA.
+      <br>
+      <a href="https://www.mdpi.com/2227-7390/11/8/1777" target="_blank">Link to reference</a>
+    </li>
+  </ul>
+
+  <p>
+    In this foundational paper, Hinton and McClelland propose the recirculation algorithm as a method for training neural networks without the need for explicit error backpropagation. Instead, the network adjusts its weights based on the difference between the input and the reconstructed output, allowing for local learning rules that are more aligned with biological neural processes.
+  </p>
+
+  <h3> Overview of the Recirculation Algorithm</h3>
+  <p>The recirculation algorithm operates in two main phases:</p>
+  <ol>
+    <li><strong>Forward Phase</strong>: The input data is passed through the network to produce an output.</li>
+    <li><strong>Backward (Recirculation) Phase</strong>: The output is then fed back into the network as input, and the network processes this "recirculated" data to produce a reconstruction.</li>
+  </ol>
+
+  <p>
+    The weights are updated based on the difference between the original input and the reconstruction, using local learning rules. This approach allows the network to learn representations by minimizing the discrepancy between the input and its reconstruction without relying on global error signals.
+    (<a href="https://pubmed.ncbi.nlm.nih.gov/30317133/?utm_source=chatgpt.com" target="_blank">PubMed</a>)
+  </p>
+
+  <h3> Further Reading</h3>
+  <ul>
+    <li>
+      <strong>Buscema, P.M.</strong> 
+      <em>Recirculation Neural Networks</em>. 
+      <a href="https://www.academia.edu/5743527/Recirculation_Neural_Networks" target="_blank">Link to paper</a>
+    </li>
+    <li>
+      <strong>Baldi, P., & Sadowski, P. (2018).</strong> 
+      <em>Learning in the Machine: Recirculation is Random Backpropagation</em>. 
+      <a href="https://pubmed.ncbi.nlm.nih.gov/30317133/" target="_blank">Link to article</a>
+    </li>
+  </ul>
+
+    <p>
+      These works delve into the theoretical underpinnings of the recirculation algorithm and its relationship to other learning methods, offering valuable insights into alternative approaches to training neural networks.
+    </p>
+
+       
+        <div class="math-formula">
+          <h3>Forward Pass:</h3>
+          $$ h = \sigma(W_1 x) $$
+          $$ y = \sigma(W_2 h) $$
+          <p class="formula-caption">where \(\sigma\) is the sigmoid activation function</p>
+        </div>
+
+        <div class="math-formula">
+          <h3>Recirculation:</h3>
+          $$ h_{rec} = \sigma(W_2^T y) $$
+          <p class="formula-caption">where \(W_2^T\) is the transpose of the decoder weights</p>
+        </div>
+
+        <div class="math-formula">
+          <h3>Weight Update:</h3>
+          $$ \Delta W_1 = \eta (h_{rec} - h) x^T $$
+          <p class="formula-caption">where \(\eta\) is the learning rate</p>
+        </div>
+
+        <h3>Key Properties:</h3>
+        <ul>
+          <li><strong>Local Learning:</strong> Updates only use information available at each synapse</li>
+          <li><strong>Biological Plausibility:</strong> No separate error backpropagation channel needed</li>
+          <li><strong>Hardware Efficiency:</strong> Well-suited for neuromorphic computing systems</li>
+        </ul>
+
+        <div class="code-block">
+          <p>Network Architecture: 2→2→2</p>
+          <ul>
+            <li>Input layer (x): 2 nodes</li>
+            <li>Hidden layer (h): 2 nodes</li>
+            <li>Output layer (y): 2 nodes</li>
+          </ul>
+        </div>
+      </div>
+      
+      <h2>Types of Autoencoders</h2>
+      <p>There are several variations of autoencoders, each with specific applications:</p>
+      
+      <div class="tabs">
+        <div class="tab active" data-tab="vanilla">Vanilla</div>
+        <div class="tab" data-tab="sparse">Sparse</div>
+        <div class="tab" data-tab="denoising">Denoising</div>
+        <div class="tab" data-tab="variational">Variational (VAE)</div>
+        <div class="tab" data-tab="convolutional">Convolutional</div>
+      </div>
+      
+      <div class="tab-content active" id="vanilla-content">
+        <h3>Vanilla Autoencoder</h3>
+        <p>The basic autoencoder architecture consists of an encoder and decoder with fully connected layers. The encoder compresses the input to a lower-dimensional code, and the decoder reconstructs the input from this code.</p>
+        <div class="math-formula">
+          $$ \mathcal{L}(\theta) = \frac{1}{N}\sum_{i=1}^N ||x_i - g_\theta(f_\theta(x_i))||^2 $$
+          <p class="formula-caption">where \(f_\theta\) is the encoder and \(g_\theta\) is the decoder</p>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="sparse-content">
+        <h3>Sparse Autoencoder</h3>
+        <p>Sparse autoencoders add a sparsity constraint to the hidden layer, forcing the model to activate only a small number of neurons at a time. This encourages the model to learn more robust features.</p>
+        <div class="math-formula">
+          $$ \mathcal{L}(\theta) = \frac{1}{N}\sum_{i=1}^N ||x_i - g_\theta(f_\theta(x_i))||^2 + \lambda \sum_{j=1}^m |\rho - \hat{\rho_j}| $$
+          <p class="formula-caption">where \(\rho\) is the target sparsity and \(\hat{\rho_j}\) is the average activation of hidden unit j</p>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="denoising-content">
+        <h3>Denoising Autoencoder</h3>
+        <p>Denoising autoencoders are trained to reconstruct clean inputs from corrupted versions. This makes them robust to noise and helps them learn more useful features.</p>
+        <div class="math-formula">
+          $$ \mathcal{L}(\theta) = \frac{1}{N}\sum_{i=1}^N ||x_i - g_\theta(f_\theta(\tilde{x_i}))||^2 $$
+          <p class="formula-caption">where \(\tilde{x_i} = x_i + \epsilon\) is the corrupted input with noise \(\epsilon\)</p>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="variational-content">
+        <h3>Variational Autoencoder (VAE)</h3>
+        <p>Variational autoencoders are probabilistic models that learn a latent variable model for the input data. Instead of encoding an input as a single point, they encode it as a distribution over the latent space.</p>
+        <p>The VAE loss function has two components: the reconstruction loss and the KL divergence between the encoder's distribution and a prior distribution.</p>
+        <div class="math-formula">
+          $$ \mathcal{L}(\phi, \theta, x) = -\mathbb{E}_{z \sim q_\phi(z|x)}[\log p_\theta(x|z)] + D_{KL}(q_\phi(z|x) || p(z)) $$
+        </div>
+      </div>
+      
+      <div class="tab-content" id="convolutional-content">
+        <h3>Convolutional Autoencoder</h3>
+        <p>Convolutional autoencoders use convolutional layers in both the encoder and decoder, making them well-suited for image data.</p>
+        <div class="math-formula">
+          $$ f_\theta(x) = \sigma(\text{Conv2D}(x) * W + b) $$
+          $$ g_\theta(z) = \sigma(\text{Conv2DTranspose}(z) * W' + b') $$
+          <p class="formula-caption">where \(W, W'\) are learnable filters and \(\sigma\) is an activation function</p>
+        </div>
+      </div>
+      
+      <h2>Applications</h2>
+      <p>Autoencoders have a wide range of applications in machine learning and data science:</p>
+      
+      <ul>
+        <li><strong>Dimensionality Reduction:</strong> Autoencoders can compress high-dimensional data into a lower-dimensional representation while preserving important features.</li>
+        <li><strong>Anomaly Detection:</strong> By learning the normal patterns in data, autoencoders can identify anomalies as inputs with high reconstruction error.</li>
+        <li><strong>Image Denoising:</strong> Denoising autoencoders can remove noise from images by learning to reconstruct clean images from noisy ones.</li>
+        <li><strong>Feature Learning:</strong> The encoded representations can be used as features for downstream tasks like classification.</li>
+        <li><strong>Generative Modeling:</strong> Variational autoencoders can generate new data samples similar to the training data.</li>
+      </ul>
+      <script>
+        // Initialize tab functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and content
+                    tabs.forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    const contentId = `${tab.dataset.tab}-content`;
+                    document.getElementById(contentId).classList.add('active');
+                });
+            });
+        });
+        </script>
+
+      
+
+      
+      <h2>Conclusion</h2>
+      <p>Autoencoders are powerful tools for unsupervised learning that can be applied to a wide range of problems. From simple linear autoencoders to complex variational models, they provide a flexible framework for learning representations of data.</p>
+      
+      <p>As we've seen, the mathematical principles behind autoencoders are elegant and provide insights into how they work. By understanding these principles, we can better design and apply autoencoders to solve real-world problems.</p>
+      
+      <p>In future posts, we'll explore more advanced topics like disentangled representations, adversarial autoencoders, and applications to specific domains like natural language processing and time series analysis.</p>
+    
+    </div>
+  </article>
+  </div>  
+  
+  </body>
+   </html>
