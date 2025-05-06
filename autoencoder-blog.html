@@ -312,6 +312,28 @@
     <div class="blog-meta">May 5, 2025 -  Multimodal Unsupervised Learning -  By Soumya Savarn</div>
     
     <div class="blog-content">
+
+      <!-- Motivation -->
+      <section id="motivation">
+        <h2>Motivation</h2>
+        <p>My journey into generative models began with what seemed like an overwhelming field. However, my academic coursework in probability theory, Deep Learning, and Multimodal Data Processing provided the perfect foundation. Through this combined knowledge, I discovered that autoencoders offered an accessible entry point into understanding and working with Generative Multimodal models. I tried to build every concept from scratch, and you can watch this video for deeper insights into my research journey. It combines all my learnings into a single comprehensive overview. Thanks to my Multimodal Data Processing course project for rekindling my passion for sharing knowledge online!</p>
+      </section>
+
+      <!-- Historical Perspective -->
+      <section id="history">
+        <h2>Historical Perspective</h2>
+        <p>Autoencoders trace back to early neural network research in the 1980s. Variants like denoising and variational autoencoders emerged after 2010, enabling applications in image and multimodal learning. Recent advances in cross-modal generation build on these foundations.</p>
+      </section>
+
+      <!-- Learning Takeaways -->
+      <section id="learning">
+        <h2>What I Learned</h2>
+        <p>This work deepened my understanding of how representation learning bridges multiple data types. I learned how different constraints (sparse, variational) shape latent spaces and model capabilities.</p>
+      </section>
+
+      
+
+
       <h2>Introduction</h2>
       <p>Autoencoders are a type of artificial neural network used for unsupervised learning. Their primary goal is to learn efficient representations of input data, typically for dimensionality reduction or noise removal. The architecture consists of an <b>encoder</b> that compresses the input, a <b>bottleneck</b> that stores the compressed knowledge, and a <b>decoder</b> that reconstructs the original data from this compressed form.</p>
       
@@ -378,8 +400,10 @@
       <p>For linear autoencoders, this has an elegant solution related to Principal Component Analysis (PCA). The optimal linear autoencoder learns to project the data onto the principal subspace of the data.</p>
       
       <div class="visualization-container">
-        <h2>The <strong>Recirculation Algorithm</strong></h2>
+        <h2><strong>BONUS: </strong>Recirculation Algorithm</h2>
+        <h4>You may skip this part.</h4>
   <p>
+    It is very rare to find something related to it in mainstream machine learning community.
     The Recirculation Algorithm is an alternative to backpropagation for training neural networks, particularly autoencoders. It was introduced by Geoffrey Hinton and James McClelland in 1987 as a more biologically plausible learning mechanism. 
     (<a href="https://www.mdpi.com/2227-7390/11/8/1777?utm_source=chatgpt.com" target="_blank">MDPI</a>)
   </p>
@@ -533,6 +557,99 @@
         <li><strong>Feature Learning:</strong> The encoded representations can be used as features for downstream tasks like classification.</li>
         <li><strong>Generative Modeling:</strong> Variational autoencoders can generate new data samples similar to the training data.</li>
       </ul>
+
+
+      <!-- Convex Interpolation in VAEs -->
+<section id="convex-interpolation">
+  <h2>Convex Interpolation in VAEs</h2>
+  <p>
+    I’ve found that in a VAE, because we force the latent variable \(z\) to follow a simple prior like \(p(z)=\mathcal{N}(0,I)\), the resulting latent space becomes (approximately) convex—any linear mix 
+    \[
+      z_\alpha = (1-\alpha)\,z_1 + \alpha\,z_2,\quad \alpha\in[0,1]
+    \]
+    stays in a high–density region where the decoder can produce meaningful outputs :contentReference[oaicite:0]{index=0}.
+  </p>
+  <p>
+    Concretely, decoding \(z_\alpha\) via \(x_\alpha = g_\theta(z_\alpha)\) often yields smooth “in‑between” samples that semantically blend the endpoints :contentReference[oaicite:1]{index=1}.  
+  </p>
+  <p>
+    However, naive latent interpolations can stray off the true data manifold, leading to artifacts. Recent work shapes the latent manifold to be locally convex—e.g., by adding a regularizer that encourages
+    \[
+      \|g_\theta((1-\alpha)z_i + \alpha z_j) - ((1-\alpha)x_i + \alpha x_j)\|\;\text{to be small}
+    \]
+    for many \(\alpha\) :contentReference[oaicite:2]{index=2}.  
+  </p>
+  <p>
+    Statisticians call evaluation inside the convex hull of training points “interpolation,” which is generally safer than extrapolating outside that hull :contentReference[oaicite:3]{index=3}.
+  </p>
+</section>
+
+<!-- Convex Interpolation in Variational Autoencoders -->
+<section id="vae-convex">
+  <h2>Convex Interpolation in Variational Autoencoders</h2>
+  <p>
+    I’ve learned that variational autoencoders (VAEs) impose a prior \(p(z)=\mathcal{N}(0,I)\) which causes the latent space to approximate a convex manifold, making linear combinations
+    \[
+      z_\alpha = (1-\alpha)\,z_1 + \alpha\,z_2,\quad \alpha\in[0,1]
+    \]
+    lie in regions where decoding yields meaningful outputs. :contentReference[oaicite:0]{index=0}
+  </p>
+  <p>
+    By decoding \(x_\alpha = g_\theta(z_\alpha)\), we obtain smooth interpolations that blend the semantic features of the endpoints. :contentReference[oaicite:1]{index=1}
+  </p>
+  <p>
+    However, naive interpolation can stray off the true data manifold and introduce artifacts; remedies include regularizers that encourage
+    \[
+      \bigl\|g_\theta((1-\alpha)z_i + \alpha z_j) - ((1-\alpha)x_i + \alpha x_j)\bigr\|
+    \]
+    to be small. :contentReference[oaicite:2]{index=2}
+  </p>
+  <p>
+    Such convexity constraints help align the latent manifold with the true data distribution, improving both interpolation quality and reconstruction fidelity. :contentReference[oaicite:3]{index=3}
+  </p>
+</section>
+
+<!-- Insights from “Multimodal Generative Models for Scalable Weakly‑Supervised Learning” -->
+<section id="mvae-paper">
+  <h2>Insights from “Multimodal Generative Models for Scalable Weakly‑Supervised Learning”</h2>
+  <p>
+    Wu & Goodman introduce the Multimodal VAE (MVAE), which fuses any subset of \(M\) modalities via a product‑of‑experts encoder
+    \[
+      q_\phi\bigl(z \mid \{x^{(i)}\}_{i\in\mathcal{O}}\bigr)
+      \propto p(z)\,\prod_{i\in\mathcal{O}} q_{\phi_i}\bigl(z\mid x^{(i)}\bigr).
+    \] :contentReference[oaicite:4]{index=4}
+  </p>
+  <p>
+    Their training objective generalizes the ELBO to multiple modalities:
+    \[
+      \mathcal{L}(\theta,\phi)
+      = \mathbb{E}_{q_\phi(z\mid x)}
+        \Bigl[\sum_{i=1}^M \log p_\theta\bigl(x^{(i)}\mid z\bigr)\Bigr]
+        \;-\;\mathrm{KL}\bigl(q_\phi(z\mid x)\,\|\,p(z)\bigr),
+    \]
+    balancing reconstruction across all modalities against regularization to the prior. :contentReference[oaicite:5]{index=5}
+  </p>
+  <p>
+    For Gaussian encoders \(q_i(z)=\mathcal{N}(\mu_i,\Sigma_i)\) and prior \(p(z)=\mathcal{N}(0,\Sigma_0)\), the PoE posterior remains Gaussian with
+    \[
+      \Sigma_*^{-1} = \Sigma_0^{-1} + \sum_{i\in\mathcal{O}} \Sigma_i^{-1},
+      \quad
+      \mu_* = \Sigma_* \Bigl(\sum_{i\in\mathcal{O}} \Sigma_i^{-1}\mu_i\Bigr),
+    \]
+    which sharpens as more modalities contribute. :contentReference[oaicite:6]{index=6}
+  </p>
+  <p>
+    They share decoder parameters \(p_\theta(x^{(i)}\mid z)\) across modalities, drastically reducing parameter count while matching state‑of‑the‑art on tasks like multimodal translation. :contentReference[oaicite:7]{index=7}
+  </p>
+  <p>
+    A sub‑sampled training paradigm alternates between fully‑observed examples (training both uni‑ and multimodal encoders) and partially‑observed examples (training each unimodal encoder), ensuring robustness to missing data. :contentReference[oaicite:8]{index=8}
+  </p>
+  <p>
+    Experiments on CelebA attributes, synthesized image‐transformation modalities, and bilingual translation confirm the MVAE’s ability to learn coherent joint representations under weak supervision. :contentReference[oaicite:9]{index=9}
+  </p>
+</section>
+
+
       <script>
         // Initialize tab functionality
         document.addEventListener('DOMContentLoaded', () => {
