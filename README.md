@@ -1,5 +1,6 @@
 I built this website to share my projects and thoughts with the machine learning community. DA323: Multimodal Data Processing 2, taught by Prof. Neeraj Sharma, inspired me to start sharing my knowledge through this platform. The course motivated me to write my first featured blog post on Autoencoders and their usage in multimodal generative models.
-
+You can read it from here: https://blog-page-lake-phi.vercel.app/autoencoder-blog.html
+Appendix Notebook (code implementations): 
 Check the deployed version: 
 For codes check the notebooks provided, however in the blog notebook links are provided wherever required.
 

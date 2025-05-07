@@ -316,7 +316,7 @@
       <!-- Motivation -->
       <section id="motivation">
         <h2>Motivation</h2>
-        <p>My journey into generative models began with what seemed like an overwhelming field. However, my academic coursework in probability theory, Deep Learning, and Multimodal Data Processing provided the perfect foundation. Through this combined knowledge, I discovered that autoencoders offered an accessible entry point into understanding and working with Generative Multimodal models. I tried to build every concept from scratch, and you can watch this video for deeper insights into my research journey. It combines all my learnings into a single comprehensive overview. Thanks to my Multimodal Data Processing course project for rekindling my passion for sharing knowledge online!</p>
+        <p>My journey into generative models began with what seemed like an overwhelming field. However, my academic coursework in probability theory, Deep Learning, and Multimodal Data Processing provided the perfect foundation. Through this cumulative knowledge, I discovered that autoencoders offered an accessible entry point into understanding and working with Generative Multimodal models. I tried to build every concept from scratch, and you can watch this video for deeper insights into my research journey. It combines all my learnings into a single comprehensive overview. Thanks to my Multimodal Data Processing course project for rekindling my passion for sharing knowledge online!</p>
       </section>
 
       <!-- Historical Perspective -->
@@ -325,11 +325,7 @@
         <p>Autoencoders trace back to early neural network research in the 1980s. Variants like denoising and variational autoencoders emerged after 2010, enabling applications in image and multimodal learning. Recent advances in cross-modal generation build on these foundations.</p>
       </section>
 
-      <!-- Learning Takeaways -->
-      <section id="learning">
-        <h2>What I Learned</h2>
-        <p>This work deepened my understanding of how representation learning bridges multiple data types. I learned how different constraints (sparse, variational) shape latent spaces and model capabilities.</p>
-      </section>
+
 
       
 
@@ -806,7 +802,10 @@
               document.getElementById('reset').addEventListener('click', resetNetwork);
               
               // Initialize
-              resetNetwork();
+              function initialize() {
+                  resetNetwork();
+              }
+              initialize();
           </script>
       
     </div>
@@ -921,27 +920,65 @@
 
 <!-- Insights from “Multimodal Generative Models for Scalable Weakly‑Supervised Learning” -->
 <div>
-  <h2>Insights from “Multimodal Generative Models for Scalable Weakly‑Supervised Learning”</h2>
+  <h2>Insights from "Multimodal Generative Models for Scalable Weakly‑Supervised Learning"</h2>
 
-  <p>I first encountered the MVAE paper by Mike Wu and Noah Goodman when I was looking for a way to merge different data types—like images, text, and audio—into one shared hidden representation called <em>z</em>. In their approach, each modality’s encoder outputs a Gaussian “expert” over <em>z</em>, and they multiply those experts together along with a simple Gaussian prior. This trick, known as the product‑of‑experts (PoE), means that as I feed in more modalities, the combined Gaussian becomes tighter (its variance shrinks), so I become more confident about the value of <em>z</em> when I have richer information.</p>
+  <p>I first encountered the MVAE paper by Mike Wu and Noah Goodman (<a href="https://arxiv.org/pdf/1802.05335" target="_blank">Wu & Goodman, 2018</a>) when I was looking for a way to merge different data types—like images, text, and audio—into one shared hidden representation called <em>z</em>. In their approach, each modality's encoder outputs a Gaussian "expert" over <em>z</em>, and they multiply those experts together along with a simple Gaussian prior. This trick, known as the product‑of‑experts (PoE), means that as I feed in more modalities, the combined Gaussian becomes tighter (its variance shrinks), so I become more confident about the value of <em>z</em> when I have richer information.</p>
 
   <p>Behind the scenes, training the MVAE means maximizing a modified evidence lower bound (ELBO). On one hand, I want to reconstruct each modality from <em>z</em>, which pushes up the sum of log‑likelihoods for every modality. On the other hand, I add a KL divergence term that keeps my fused posterior close to the standard normal prior, preventing the model from becoming overconfident. To handle missing data, the authors alternate between fully observed examples—where all encoders and the PoE get updated—and partially observed examples—where only the single‑modality encoder for the available data is updated. This sub‑sampling trick makes sure I can still infer a sensible <em>z</em> even if some streams drop out.</p>
 
-  <p>An elegant aspect of MVAE is its shared decoder. Instead of building one large decoder per modality, they attach small “heads” for each output type to a single backbone network. This reduces the total number of parameters and forces the model to learn a core latent space that works across all data types. When I ran experiments on tasks like predicting CelebA attributes from face images and captions, or translating between English and French sentences, the MVAE matched or beat state‑of‑the‑art methods while using far fewer weights.</p>
+  <p>An elegant aspect of MVAE is its shared decoder. Instead of building one large decoder per modality, they attach small “heads” for each output type to a single backbone network. This reduces the total number of parameters and forces the model to learn a core latent space that works across all data types.</p>
 
-  <h3>How the Product‑of‑Experts Works</h3>
-  <p>Imagine I have a standard normal prior <em>p(z)=N(0,1)</em> and two modality encoders giving Gaussian posteriors: from an image encoder I get <em>N(μ₁=2, σ₁²=0.25)</em>, and from a text encoder I get <em>N(μ₂=4, σ₂²=1)</em>. To combine them, I convert variances into precisions (inverse variance): τ₀=1, τ₁=4, τ₂=1, so the total precision is τ*=6. That gives me a combined variance σ*²=1/6≈0.167. The fused mean is (τ₀⋅0 + τ₁⋅2 + τ₂⋅4)/(τ*) =12/6=2. So my product‑of‑experts posterior becomes <em>N(2, 0.167)</em>. Notice how 0.167 is smaller than each individual variance—that’s the sharpening effect of PoE when I have both modalities.</p>
 
-  <h3>Shared Decoder and Parameter Efficiency</h3>
-  <p>In the decoder, I use one neural network backbone and then branch off small heads for each modality. This means fewer total parameters compared to having a completely separate decoder per modality. Sharing parameters in this way ensures the latent code <em>z</em> captures features relevant to all data types, rather than letting each decoder learn its own private tricks.</p>
+  <style>
+    code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 4px; }
+    .example { background-color: #eef; padding: 10px; border-left: 4px solid #88f; margin: 10px 0; }
+  </style>
 
-  <h3>Training with Missing Data</h3>
-  <p>Real‑world datasets often have gaps, so MVAE trains on two kinds of examples. When all modalities are present, I update both the PoE encoder and every unimodal encoder. When only one modality is present, I update just that encoder. This alternation makes the model robust: it learns to fuse rich multimodal inputs and also to handle cases when only a single view is available.</p>
+  <p>A Variational Autoencoder (VAE) models data <em>x</em> using a latent variable <em>z</em>, with a prior <code>p(z)</code> (often a standard Gaussian) and a decoder <code>p<sub>θ</sub>(x|z)</code> implemented by a neural network. Because the true data likelihood is hard to compute, we optimize the <strong>Evidence Lower Bound (ELBO)</strong> instead:</p>
+  <pre><code>ELBO(x) = E<sub>q<sub>φ</sub>(z|x)</sub>[log p<sub>θ</sub>(x|z)] - KL(q<sub>φ</sub>(z|x) || p(z))</code></pre>
+  <p>Here, <code>q<sub>φ</sub>(z|x)</code> is an encoder (inference network) approximating the posterior, and <code>KL</code> is the Kullback-Leibler divergence.</p>
 
-  <h3>Results and Applications</h3>
-  <p>When I applied MVAE to tasks like face‑attribute prediction (CelebA), synthetic image transforms (e.g., rotations), and bilingual translation (English↔French), the model consistently learned a coherent joint representation. I could predict missing modalities and translate between them, all with fewer parameters than comparable methods.</p>
+  <h3>Extending to Multiple Modalities</h3>
+  <p>If we have <em>N</em> different inputs (modalities) <code>x<sub>1</sub>, x<sub>2</sub>, ..., x<sub>N</sub></code> (e.g., image, text, audio), we assume they are independent given <code>z</code>. The generative model becomes:</p>
+  <pre><code>p(z, x<sub>1</sub>, ..., x<sub>N</sub>) = p(z) &times; ∏ p<sub>θ</sub>(x<sub>i</sub>|z)</code></pre>
+  <p>When some modalities are missing, we simply ignore them in training.</p>
 
-  <p>Working through these ideas helped me see why product‑of‑experts sharpens uncertainty and why sharing decoders yields a compact, unified latent space. The sub‑sampling training trick then ties it all together, making MVAE a powerful tool for real‑world multimodal data that often arrives incomplete.</p>
+  <h3>Combining Encoders with Product-of-Experts</h3>
+  <p>We need a combined encoder <code>q(z|x<sub>1</sub>,...,x<sub>N</sub>)</code>. A neat trick is the <em>Product-of-Experts (PoE)</em>:</p>
+  <pre><code>q(z|x<sub>1</sub>,...,x<sub>N</sub>) ∝ p(z) &times; ∏ q̃(z|x<sub>i</sub>),</code></pre>
+  <p>where each <code>q̃(z|x<sub>i</sub>)</code> is a Gaussian from the encoder for modality <em>i</em>, and <code>p(z)</code> acts as a "prior expert."</p>
+
+  <h3>Numerical Example</h3>
+  <div class="example">
+    <p>Suppose we have <strong>2 modalities</strong> with Gaussian encoders:</p>
+    <ul>
+      <li>Modality 1: <code>q̃(z|x<sub>1</sub>) = N(z; μ<sub>1</sub>=2, σ<sub>1</sub><sup>2</sup>=1)</code></li>
+      <li>Modality 2: <code>q̃(z|x<sub>2</sub>) = N(z; μ<sub>2</sub>=0, σ<sub>2</sub><sup>2</sup>=4)</code></li>
+      <li>Prior: <code>p(z) = N(z; 0, 1)</code></li>
+    </ul>
+    <p>Compute precision (<code>T = 1/variance</code>):</p>
+    <ul>
+      <li>T<sub>1</sub> = 1/1 = 1</li>
+      <li>T<sub>2</sub> = 1/4 = 0.25</li>
+      <li>T<sub>0</sub> (prior) = 1/1 = 1</li>
+    </ul>
+    <p><strong>Combined precision:</strong> T = T<sub>0</sub> + T<sub>1</sub> + T<sub>2</sub> = 1 + 1 + 0.25 = 2.25</p>
+    <p><strong>Combined mean:</strong></p>
+    <pre><code>μ = (T<sub>0</sub>·0 + T<sub>1</sub>·2 + T<sub>2</sub>·0) / T = (0 + 2 + 0) / 2.25 ≈ 0.89</code></pre>
+    <p><strong>Combined variance:</strong> σ<sup>2</sup> = 1 / T = 1 / 2.25 ≈ 0.44</p>
+    <p>So the multimodal posterior is <code>N(z; μ≈0.89, σ≈0.66)</code>. This single Gaussian summarizes both inputs and the prior!</p>
+  </div>
+
+  <h3>Putting It All Together</h3>
+  <p>1. <strong>Encode each modality</strong>: get its <code>μ<sub>i</sub></code> and <code>σ<sub>i</sub></code>.<br>
+  2. <strong>Combine with PoE</strong>: use the formulas above to get joint <code>μ</code> and <code>σ</code>.<br>
+  3. <strong>Reparameterize</strong>: sample <code>z = μ + σ ⊙ ε</code> with ε∼N(0, I).<br>
+  4. <strong>Decode</strong>: reconstruct each modality with <code>p<sub>θ</sub>(x<sub>i</sub>|z)</code>.<br>
+  5. <strong>Optimize ELBO</strong>: sum reconstruction losses and KL term.</p>
+
+  <p>This simple approach lets us handle any combination of missing modalities without training separate encoders for each subset!</p>
+
+
 </div>
 
 
