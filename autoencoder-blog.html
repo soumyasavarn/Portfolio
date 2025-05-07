@@ -166,7 +166,27 @@
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
+.notebook-reference {
+    background: #f8f9fa;
+    border-left: 4px solid #0366d6;
+    padding: 16px;
+    margin: 24px 0;
+    border-radius: 4px;
+}
 
+.implementation-note {
+    background: #f0f7ff;
+    border-left: 4px solid #79b8ff;
+    padding: 12px 16px;
+    margin: 16px 0;
+    border-radius: 4px;
+    font-size: 0.95em;
+}
+
+.implementation-note h3 {
+    margin-top: 0;
+    color: #0366d6;
+}
 .tab-content.active {
     display: block;
     animation: fadeIn 0.3s ease-in;
@@ -306,6 +326,56 @@
         padding: 12px;
     }
 }
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 24px 0;
+}
+
+.grid-item {
+    text-align: center;
+}
+
+.architecture-img {
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.img-caption {
+    margin-top: 12px;
+    color: var(--light-text);
+    font-size: 0.9em;
+}
+
+@media (max-width: 768px) {
+    .comparison-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.reference-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.reference-list li {
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+.reference-list ul {
+    padding-left: 20px;
+    margin-top: 8px;
+}
+
+#references h3 {
+    margin-top: 24px;
+    color: var(--primary-color);
+    font-size: 1.2em;
+}
   </style> </head> <body> <div id="main" style="padding: 32px 15vw;"> <a href="index.html" class="back-btn">&larr; Back to Home</a>
   <article class="blog-post">
     <h1>Everything about Autoencoders: From Linear Algebra to its Multimodal and Cross-modal Generative Capabilities</h1>
@@ -326,8 +396,15 @@
       </section>
 
       <h2>Introduction</h2>
-      <p>Autoencoders are a type of artificial neural network used for unsupervised learning. Their primary goal is to learn efficient representations of input data, typically for dimensionality reduction or noise removal. The architecture consists of an <b>encoder</b> that compresses the input, a <b>bottleneck</b> that stores the compressed knowledge, and a <b>decoder</b> that reconstructs the original data from this compressed form.</p>
+      <p>Autoencoders are a type of artificial neural network used for unsupervised learning. Their primary goal is to learn efficient representations of input data, typically for dimensionality reduction or noise removal. The architecture consists of an <b>encoder</b> that compresses the input, a <b>bottleneck</b> that stores the compressed knowledge, and a <b>decoder</b> that reconstructs the original data from this compressed form. <div class="notebook-reference">
+        <p>All code implementations discussed in this blog can be found in this <a href="https://www.kaggle.com/code/soumyasavarn/everything-about-autoencoders/notebook?scriptVersionId=238355572" target="_blank">Kaggle notebook</a>.</p>
+      </div></p>
       
+      <div class="visualization-container">
+        <img src="images/diagram-auto.png" alt="General Autoencoder Architecture" class="architecture-img">
+        <p class="img-caption">Basic architecture of an autoencoder showing encoder, bottleneck, and decoder components</p>
+      </div>
+
       <p>In this blog, we'll explore autoencoders from their mathematical foundations to advanced applications in multimodal learning. We'll also implement interactive visualizations to help you understand how autoencoders work.</p>
       
       <h2>Autoencoder vs U-Net: Understanding the Differences</h2>
@@ -370,7 +447,7 @@
       
       <div class="visualization-container">
         <h3>Autoencoder Architecture</h3>
-        <img src="autoencoder-architecture.png" alt="Autoencoder Architecture showing encoder, bottleneck, and decoder" class="architecture-img">
+        <img src="images/autoencoder-architecture.png" alt="Autoencoder Architecture showing encoder, bottleneck, and decoder" class="architecture-img">
         <p class="img-caption">Basic architecture of an autoencoder showing the encoding and decoding process</p>
       </div>
       
@@ -389,6 +466,20 @@
       </div>
       
       <p>Surprisingly, for linear autoencoders (using only linear activations), the optimal solution is equivalent to Principal Component Analysis (PCA). This mathematical connection is well-explained in <a href="https://www.cse.iitm.ac.in/~miteshk/CS7015/Slides/Teaching/src/Lecture7/modules/Module2/Lecture7_2.pdf" target="_blank">these lecture notes from IIT Madras's Deep Learning course</a> and rigorously proven in <a href="https://arxiv.org/abs/1804.10253" target="_blank">this paper by Plaut (2018)</a>. The linear autoencoder learns to project data onto the principal subspace, just like PCA.</p>
+      <div class="implementation-note">
+        <p>💡 For practical implementation of linear autoencoders and their equivalence to PCA, check <a href="https://www.kaggle.com/code/soumyasavarn/everything-about-autoencoders/notebook?scriptVersionId=238355572#Appendix-1:-Linear-Autoencoders-and-PCA" target="_blank">Appendix 1 of the companion notebook</a>.</p>
+      </div>
+      
+      <div class="visualization-container comparison-grid">
+        <div class="grid-item">
+            <img src="images/linear_auto.png" alt="Linear Autoencoder Architecture" class="architecture-img">
+            <p class="img-caption">Linear Autoencoder Structure</p>
+        </div>
+        <div class="grid-item">
+            <img src="images/pca.png" alt="PCA Visualization" class="architecture-img">
+            <p class="img-caption">Principal Component Analysis (PCA)</p>
+        </div>
+      </div>
 
       <div class="math-formula">
         \[ \mathcal{L}(\phi, \theta) = \frac{1}{N}\sum_{i=1}^N \|\mathbf{x}_i - g_\theta(f_\phi(\mathbf{x}_i))\|^2 \]
@@ -478,7 +569,7 @@
 
         <div class="visualization-container">
             <h2>Recirculation Algorithm Visualization</h2>
-            <img src="recirculation.png" alt="Recirculation Algorithm Flow" class="architecture-img">
+            <img src="images/recirculation.png" alt="Recirculation Algorithm Flow" class="architecture-img">
             <p class="img-caption">Visual representation of the recirculation algorithm showing forward pass and backward recirculation</p>
         </div>
     
@@ -805,6 +896,20 @@
       
     </div>
 
+<section id="thought-experiment" class="implementation-note">
+  <h3>Food for Thought: Voice Interpolation</h3>
+  <p>
+    Think about this—what if we could map the voices of two famous singers, like Arijit Singh and Atif Aslam, and then find a smooth path from one voice to the other? Kind of like moving a slider from one style to the next. That would be amazing, right?
+  </p>
+  
+  <p>
+    Now take it a step further—what if you could see how close your voice is to your favorite singer's? Just like with face filters where you can see how your face compares to someone else's, we could do something similar with voice. You could actually learn how your voice is different, and maybe even change it to sound more like theirs.
+  </p>
+  
+  <p>
+    The idea sounds fun—and the possibilities are endless!
+  </p>
+</section>
 
       <h2>Types of Autoencoders</h2>
       <p>There are several variations of autoencoders, each with specific applications:</p>
@@ -893,6 +998,15 @@
   <p>
     Statisticians call evaluation inside the convex hull of training points “interpolation,” which is generally safer than extrapolating outside that hull .
   </p>
+  <div class="implementation-note">
+    <p>💡 To see convex interpolation in action with implementation details, visit <a href="https://www.kaggle.com/code/soumyasavarn/everything-about-autoencoders/notebook?scriptVersionId=238355572#Appendix-2:-Convex-Interpolation" target="_blank">Appendix 2 of the companion notebook</a>.</p>
+  </div>
+
+  <div class="visualization-container">
+    <img src="images/convex.png" alt="Convex Interpolation in Latent Space" class="architecture-img">
+    <p class="img-caption">Visualization of convex interpolation in the VAE latent space</p>
+  </div>
+
 </section>
 
 <!-- Insights from “Multimodal Generative Models for Scalable Weakly‑Supervised Learning” -->
@@ -972,10 +1086,49 @@
   5. <strong>Optimize ELBO</strong>: sum reconstruction losses and KL term.</p>
 
   <p>This simple approach lets us handle any combination of missing modalities without training separate encoders for each subset!</p>
+  <div class="implementation-note">
+    <p>💡 For a complete implementation of the Product of Experts (PoE) approach, check out <a href="https://www.kaggle.com/code/soumyasavarn/everything-about-autoencoders/notebook?scriptVersionId=238355572#Appendix-3:-Product-of-Experts" target="_blank">Appendix 3 of the companion notebook</a>.</p>
+  </div>
 
+  <div class="visualization-container">
+    <img src="images/poes.png" alt="Product of Experts Architecture" class="architecture-img">
+    <p class="img-caption">Product of Experts (PoE) combining multiple modality encoders</p>
+  </div>
 
 </div>
 
+<section id="references">
+  <h2>References</h2>
+  
+  <h3>Papers</h3>
+  <ul class="reference-list">
+    <li>Wu, M., & Goodman, N. (2018). <a href="https://arxiv.org/pdf/1802.05335" target="_blank">Multimodal Generative Models for Scalable Weakly-Supervised Learning</a>. arXiv preprint arXiv:1802.05335.</li>
+    <li>Dai, B., et al. (2021). <a href="https://arxiv.org/abs/2110.04121" target="_blank">Multimodal Conditional Image Synthesis with Product-of-Experts GANs</a>. arXiv preprint arXiv:2110.04121.</li>
+    <li>Plaut, E. (2018). <a href="https://arxiv.org/abs/1804.10253" target="_blank">From Principal Subspaces to Principal Components with Linear Autoencoders</a>. arXiv preprint arXiv:1804.10253.</li>
+    <li>Hinton, G.E., & McClelland, J.L. (1987). Learning Representations by Recirculation. In <em>Neural Information Processing Systems</em>.</li>
+  </ul>
+
+  <h3>Books</h3>
+  <ul class="reference-list">
+    <li>Goodfellow, I., Bengio, Y., & Courville, A. (2016). <a href="https://www.deeplearningbook.org/" target="_blank">Deep Learning</a>. MIT Press.</li>
+  </ul>
+
+  <h3>Videos</h3>
+  <ul class="reference-list">
+    <li>Deepia. (2023). <a href="https://www.youtube.com/watch?v=qJeaCHQ1k2w" target="_blank">Understanding Autoencoders: A Visual Guide</a>.</li>
+  </ul>
+
+  <h3>Tools Used</h3>
+  <ul class="reference-list">
+    <li><strong>Code Assistance:</strong>
+      <ul>
+        <li>Claude 3.5 Sonnet - JavaScript interactivity and animations</li>
+        <li>GitHub Copilot - Image placement and layout assistance</li>
+      </ul>
+    </li>
+    <li><strong>Deployment:</strong> Vercel</li>
+  </ul>
+</section>
 
       <script>
         // Initialize tab functionality
@@ -999,9 +1152,278 @@
         });
         </script>
 
-      
+<script>
+// Add animation container divs after each respective section
+const animations = `
+<div class="animation-container">
+    <canvas id="standardAutoencoder" width="600" height="200"></canvas>
+    <canvas id="vaeFlow" width="600" height="200"></canvas>
+    <canvas id="multimodalFlow" width="600" height="300"></canvas>
+    <div class="animation-controls">
+        <button onclick="toggleAnimation()">Play/Pause</button>
+        <button onclick="resetAnimation()">Reset</button>
+    </div>
+</div>
+`;
 
-      
+// Animation variables
+let animationFrame;
+let isAnimating = true;
+let t = 0;
+
+// Colors
+const colors = {
+    input: '#4CAF50',
+    latent: '#2196F3',
+    output: '#FF5722',
+    flow: '#9C27B0'
+};
+
+function drawStandardAutoencoder(ctx) {
+    ctx.clearRect(0, 0, 600, 200);
+    
+    const inputX = 100;
+    const hiddenX = 300;
+    const outputX = 500;
+    const nodeRadius = 15;
+    const nodeSpacing = 40;
+    const numInputNodes = 4;  // Increased number of nodes
+    
+    // Input layer (4 nodes)
+    for (let i = 0; i < numInputNodes; i++) {
+        const y = 100 + (i - (numInputNodes-1)/2) * nodeSpacing;
+        drawNode(ctx, inputX, y, colors.input);
+        ctx.fillStyle = 'black';
+        ctx.fillText(`x${i+1}`, inputX - 25, y);
+        
+        // Connection to hidden layer
+        const weight = Math.sin(t + i);
+        drawFlow(ctx, 
+            inputX + nodeRadius, y,
+            hiddenX - nodeRadius, 100,
+            t + i * 0.2
+        );
+    }
+    
+    // Hidden layer (1 node)
+    drawNode(ctx, hiddenX, 100, colors.latent);
+    ctx.fillStyle = 'black';
+    ctx.fillText('z', hiddenX, 100 - 25);
+    
+    // Output layer (4 nodes)
+    for (let i = 0; i < numInputNodes; i++) {
+        const y = 100 + (i - (numInputNodes-1)/2) * nodeSpacing;
+        drawNode(ctx, outputX, y, colors.output);
+        ctx.fillStyle = 'black';
+        ctx.fillText(`x'${i+1}`, outputX + 25, y);
+        
+        // Connection from hidden layer
+        const weight = Math.sin(t - i);
+        drawFlow(ctx,
+            hiddenX + nodeRadius, 100,
+            outputX - nodeRadius, y,
+            t + i * 0.2
+        );
+    }
+}
+
+function drawFlow(ctx, x1, y1, x2, y2, t) {
+    const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+    gradient.addColorStop(0, 'rgba(156, 39, 176, 0.1)');
+    gradient.addColorStop((1 + Math.sin(t * 2)) / 2, 'rgba(156, 39, 176, 0.8)');
+    gradient.addColorStop(1, 'rgba(156, 39, 176, 0.1)');
+    
+    // Draw connection line
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Add flow particles
+    const numParticles = 3;
+    for(let i = 0; i < numParticles; i++) {
+        const progress = (t + i/numParticles) % 1;
+        const x = x1 + (x2 - x1) * progress;
+        const y = y1 + (y2 - y1) * progress;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(156, 39, 176, 0.8)';
+        ctx.fill();
+    }
+}
+
+function drawNode(ctx, x, y, color, label = '') {
+    ctx.beginPath();
+    ctx.arc(x, y, 15, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.stroke();
+    
+    if (label) {
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, x, y + 30);
+    }
+}
+
+function drawVAE(ctx) {
+    ctx.clearRect(0, 0, 600, 200);
+    
+    // Draw mean and variance paths
+    const y = Math.sin(t) * 5;
+    
+    // Input
+    drawNode(ctx, 100, 100, colors.input);
+    // Mean & variance
+    drawNode(ctx, 300, 80 - y, colors.latent);
+    drawNode(ctx, 300, 120 + y, colors.latent);
+    // Sampled z
+    drawNode(ctx, 400, 100, colors.flow);
+    // Output
+    drawNode(ctx, 500, 100, colors.output);
+    
+    // Draw distributions and sampling
+    drawDistribution(ctx, 300, 100, t);
+    drawFlow(ctx, 400, 100, 500, 100, t);
+}
+
+function drawMultimodalFlow(ctx) {
+    ctx.clearRect(0, 0, 600, 300);
+    
+    // Draw multiple inputs
+    const x = Math.sin(t) * 10;
+    
+    // Input modalities
+    drawNode(ctx, 100, 50, '#E91E63', 'Image');
+    drawNode(ctx, 100, 150, '#009688', 'Text');
+    drawNode(ctx, 100, 250, '#FF9800', 'Audio');
+    
+    // Individual encoders
+    drawNode(ctx, 250, 50, colors.latent);
+    drawNode(ctx, 250, 150, colors.latent);
+    drawNode(ctx, 250, 250, colors.latent);
+    
+    // Merged representation
+    drawNode(ctx, 400, 150, colors.flow, 'PoE');
+    
+    // Output reconstructions
+    drawNode(ctx, 550, 50, '#E91E63');
+    drawNode(ctx, 550, 150, '#009688');
+    drawNode(ctx, 550, 250, '#FF9800');
+    
+    // Draw flows
+    drawFlow(ctx, 100, 50, 250, 50, t);
+    drawFlow(ctx, 100, 150, 250, 150, t);
+    drawFlow(ctx, 100, 250, 250, 250, t);
+    
+    // Merge flows
+    drawFlow(ctx, 250, 50, 400, 150, t);
+    drawFlow(ctx, 250, 150, 400, 150, t);
+    drawFlow(ctx, 250, 250, 400, 150, t);
+    
+    // Output flows
+    drawFlow(ctx, 400, 150, 550, 50, t);
+    drawFlow(ctx, 400, 150, 550, 150, t);
+    drawFlow(ctx, 400, 150, 550, 250, t);
+}
+
+function drawDistribution(ctx, x, y, t) {
+    const variance = 20 + Math.sin(t) * 5;
+    ctx.beginPath();
+    for (let i = -30; i < 30; i++) {
+        const x1 = x + i;
+        const y1 = y + Math.exp(-(i * i) / (2 * variance)) * 30;
+        if (i === -30) ctx.moveTo(x1, y1);
+        else ctx.lineTo(x1, y1);
+    }
+    ctx.strokeStyle = colors.flow;
+    ctx.stroke();
+}
+
+function animate() {
+    if (!isAnimating) return;
+    
+    t += 0.05;
+    
+    const standardCtx = document.getElementById('standardAutoencoder').getContext('2d');
+    const vaeCtx = document.getElementById('vaeFlow').getContext('2d');
+    const multimodalCtx = document.getElementById('multimodalFlow').getContext('2d');
+    
+    drawStandardAutoencoder(standardCtx);
+    drawVAE(vaeCtx);
+    drawMultimodalFlow(multimodalCtx);
+    
+    animationFrame = requestAnimationFrame(animate);
+}
+
+function toggleAnimation() {
+    isAnimating = !isAnimating;
+    if (isAnimating) animate();
+}
+
+function resetAnimation() {
+    t = 0;
+    if (!isAnimating) {
+        const standardCtx = document.getElementById('standardAutoencoder').getContext('2d');
+        const vaeCtx = document.getElementById('vaeFlow').getContext('2d');
+        const multimodalCtx = document.getElementById('multimodalFlow').getContext('2d');
+        
+        drawStandardAutoencoder(standardCtx);
+        drawVAE(vaeCtx);
+        drawMultimodalFlow(multimodalCtx);
+    }
+}
+
+// Add necessary styles
+const styles = `
+<style>
+.animation-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin: 20px 0;
+}
+
+.animation-controls {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.animation-controls button {
+    margin: 0 5px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    background: var(--primary-color);
+    color: white;
+    cursor: pointer;
+}
+
+.animation-controls button:hover {
+    background: var(--accent-color);
+}
+
+canvas {
+    width: 100%;
+    height: auto;
+    margin: 10px 0;
+}
+</style>
+`;
+
+// Initialize animations when document loads
+document.addEventListener('DOMContentLoaded', () => {
+    // Add animations after respective sections
+    document.querySelector('#vanilla-content').insertAdjacentHTML('beforeend', animations);
+    document.head.insertAdjacentHTML('beforeend', styles);
+    animate();
+});
+</script>
+
      
     </div>
   </article>
