@@ -567,349 +567,11 @@
           <li><strong>Hardware Efficiency:</strong> Well-suited for neuromorphic computing systems</li>
         </ul>
 
-        <div class="visualization-container">
-            <h2>Recirculation Algorithm Visualization</h2>
-            <img src="images/recirculation.png" alt="Recirculation Algorithm Flow" class="architecture-img">
-            <p class="img-caption">Visual representation of the recirculation algorithm showing forward pass and backward recirculation</p>
-        </div>
-    
-          <title>Recirculation Algorithm Visualization</title>
-          <style>
-              body {
-                  font-family: Arial, sans-serif;
-                  margin: 20px;
-              }
-              .container {
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-              }
-              canvas {
-                  border: 1px solid #ccc;
-                  margin: 10px 0;
-              }
-              .controls {
-                  margin: 15px 0;
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-              }
-              button {
-                  padding: 8px 15px;
-                  margin: 5px;
-                  cursor: pointer;
-              }
-              .metrics {
-                  margin: 10px 0;
-                  padding: 10px;
-                  background-color: #f5f5f5;
-                  border-radius: 5px;
-                  width: 600px;
-              }
-              .layer-info {
-                  display: flex;
-                  justify-content: space-around;
-                  width: 600px;
-                  margin-top: 10px;
-              }
-          </style>
-     
-          <div class="container">
-              <h2>Recirculation Algorithm for 2→1→2 Autoencoder</h2>
-              <div class="controls">
-                  <button id="trainStep">Train Step</button>
-                  <button id="train100">Train 100 Steps</button>
-                  <button id="reset">Reset Network</button>
-              </div>
-              <canvas id="networkCanvas" width="600" height="300"></canvas>
-              <div class="metrics">
-                  <div id="errorDisplay">Reconstruction Error: 0.0</div>
-                  <div id="iterationDisplay">Iterations: 0</div>
-              </div>
-              <div class="layer-info">
-                  <div>
-                      <h3>Input Data</h3>
-                      <pre id="inputData"></pre>
-                  </div>
-                  <div>
-                      <h3>Weights</h3>
-                      <pre id="weightsDisplay"></pre>
-                  </div>
-                  <div>
-                      <h3>Reconstruction</h3>
-                      <pre id="reconstructionData"></pre>
-                  </div>
-              </div>
-          </div>
-      
-          <script>
-              // Network parameters
-              const learningRate = 0.1;
-              let iterations = 0;
-              
-              // Initialize weights with small random values for 2→1→2 architecture
-              let W1 = [
-                  [Math.random() * 0.2 - 0.1], // 2×1 matrix
-                  [Math.random() * 0.2 - 0.1]
-              ];
-              
-              let W2 = [
-                  [Math.random() * 0.2 - 0.1], // 1×2 matrix
-                  [Math.random() * 0.2 - 0.1]
-              ];
-              
-              // Training data - simple patterns (unchanged)
-              const trainingData = [
-                  [0.1, 0.2],
-                  [0.2, 0.4],
-                  [1.0, 2.0],
-                  [0.4, 0.8]
-              ];
-              
-              let currentSampleIndex = 0;
-              
-              function sigmoid(x) {
-                  return 1 / (1 + Math.exp(-x));
-              }
-              
-              // Forward pass for 2→1→2 architecture
-              function forwardPass(x) {
-                  // Hidden layer (single node)
-                  const h = sigmoid(W1[0][0] * x[0] + W1[1][0] * x[1]);
-                  
-                  // Output layer
-                  const y = [0, 0];
-                  y[0] = sigmoid(W2[0][0] * h);
-                  y[1] = sigmoid(W2[1][0] * h);
-                  
-                  return { h, y };
-              }
-              
-              // Recirculation for 2→1→2 architecture
-              function recirculation(y) {
-                  // Single hidden node reconstruction
-                  const hRec = sigmoid(W2[0][0] * y[0] + W2[1][0] * y[1]);
-                  return hRec;
-              }
-              
-              // Weight update for 2→1→2 architecture
-              function updateWeights(x, h, hRec) {
-                  // Update W1 (2×1 matrix)
-                  W1[0][0] += learningRate * (hRec - h) * x[0];
-                  W1[1][0] += learningRate * (hRec - h) * x[1];
-                  
-                  // Update W2 (1×2 matrix)
-                  W2[0][0] += learningRate * (y[0] - x[0]) * h;
-                  W2[1][0] += learningRate * (y[1] - x[1]) * h;
-              }
-              
-              // Calculate reconstruction error
-              function calculateError(x, y) {
-                  return Math.sqrt(Math.pow(x[0] - y[0], 2) + Math.pow(x[1] - y[1], 2));
-              }
-              
-              // Training step
-              function trainStep() {
-                  // Get current training sample
-                  const x = trainingData[currentSampleIndex];
-                  
-                  // Forward pass
-                  const { h, y } = forwardPass(x);
-                  
-                  // Recirculation
-                  const hRec = recirculation(y);
-                  
-                  // Update weights
-                  updateWeights(x, h, hRec);
-                  
-                  // Calculate error
-                  const error = calculateError(x, y);
-                  
-                  // Update displays
-                  updateDisplays(x, y, error);
-                  
-                  // Move to next sample
-                  currentSampleIndex = (currentSampleIndex + 1) % trainingData.length;
-                  iterations++;
-                  
-                  return error;
-              }
-              
-              // Reset network
-              function resetNetwork() {
-                  W1 = [
-                      [Math.random() * 0.2 - 0.1], // 2×1 matrix
-                      [Math.random() * 0.2 - 0.1]
-                  ];
-                  
-                  W2 = [
-                      [Math.random() * 0.2 - 0.1], // 1×2 matrix
-                      [Math.random() * 0.2 - 0.1]
-                  ];
-                  
-                  iterations = 0;
-                  currentSampleIndex = 0;
-                  
-                  // Update displays
-                  const x = trainingData[currentSampleIndex];
-                  const { y } = forwardPass(x);
-                  const error = calculateError(x, y);
-                  updateDisplays(x, y, error);
-                  
-                  // Redraw network
-                  drawNetwork();
-              }
-              
-              // Update displays
-              function updateDisplays(x, y, error) {
-                  document.getElementById('errorDisplay').textContent = `Reconstruction Error: ${error.toFixed(4)}`;
-                  document.getElementById('iterationDisplay').textContent = `Iterations: ${iterations}`;
-                  document.getElementById('inputData').textContent = `[${x[0].toFixed(2)}, ${x[1].toFixed(2)}]`;
-                  document.getElementById('reconstructionData').textContent = `[${y[0].toFixed(2)}, ${y[1].toFixed(2)}]`;
-                  document.getElementById('weightsDisplay').textContent = 
-                      `W1:\n[${W1[0][0].toFixed(2)}]\n[${W1[1][0].toFixed(2)}]\n\n` +
-                      `W2:\n[${W2[0][0].toFixed(2)}]\n[${W2[1][0].toFixed(2)}]`;
-                  
-                  // Redraw network
-                  drawNetwork();
-              }
-              
-              // Draw network visualization
-              function drawNetwork() {
-                  const canvas = document.getElementById('networkCanvas');
-                  const ctx = canvas.getContext('2d');
-                  
-                  // Clear canvas
-                  ctx.clearRect(0, 0, canvas.width, canvas.height);
-                  
-                  // Node positions
-                  const inputX = 100;
-                  const hiddenX = 300;
-                  const outputX = 500;
-                  const nodeRadius = 20;
-                  const nodeSpacing = 80;
-                  
-                  // Draw nodes
-                  // Input layer (2 nodes)
-                  ctx.fillStyle = '#A0E7E5';
-                  for (let i = 0; i < 2; i++) {
-                      const y = 150 + (i - 0.5) * nodeSpacing;
-                      ctx.beginPath();
-                      ctx.arc(inputX, y, nodeRadius, 0, 2 * Math.PI);
-                      ctx.fill();
-                      ctx.stroke();
-                      
-                      // Node label
-                      ctx.fillStyle = 'black';
-                      ctx.textAlign = 'center';
-                      ctx.textBaseline = 'middle';
-                      ctx.font = '12px Arial';
-                      ctx.fillText(`x${i+1}`, inputX, y);
-                      ctx.fillStyle = '#A0E7E5';
-                  }
-                  
-                  // Hidden layer (1 node)
-                  ctx.fillStyle = '#FFAEBC';
-                  ctx.beginPath();
-                  ctx.arc(hiddenX, 150, nodeRadius, 0, 2 * Math.PI);
-                  ctx.fill();
-                  ctx.stroke();
-                  
-                  // Hidden node label
-                  ctx.fillStyle = 'black';
-                  ctx.textAlign = 'center';
-                  ctx.textBaseline = 'middle';
-                  ctx.font = '12px Arial';
-                  ctx.fillText('h', hiddenX, 150);
-                  
-                  // Output layer (2 nodes)
-                  ctx.fillStyle = '#B4F8C8';
-                  for (let i = 0; i < 2; i++) {
-                      const y = 150 + (i - 0.5) * nodeSpacing;
-                      ctx.beginPath();
-                      ctx.arc(outputX, y, nodeRadius, 0, 2 * Math.PI);
-                      ctx.fill();
-                      ctx.stroke();
-                      
-                      // Node label
-                      ctx.fillStyle = 'black';
-                      ctx.textAlign = 'center';
-                      ctx.textBaseline = 'middle';
-                      ctx.font = '12px Arial';
-                      ctx.fillText(`y${i+1}`, outputX, y);
-                      ctx.fillStyle = '#B4F8C8';
-                  }
-                  
-                  // Draw connections for 2→1→2 architecture
-                  // Input to hidden connections
-                  for (let i = 0; i < 2; i++) {
-                      const inputY = 150 + (i - 0.5) * nodeSpacing;
-                      const weight = W1[i][0];
-                      const lineWidth = Math.min(Math.abs(weight) * 5, 8);
-                      
-                      ctx.beginPath();
-                      ctx.moveTo(inputX + nodeRadius, inputY);
-                      ctx.lineTo(hiddenX - nodeRadius, 150);
-                      ctx.strokeStyle = weight >= 0 ? 'blue' : 'red';
-                      ctx.lineWidth = lineWidth;
-                      ctx.stroke();
-                  }
-                  
-                  // Hidden to output connections
-                  for (let i = 0; i < 2; i++) {
-                      const outputY = 150 + (i - 0.5) * nodeSpacing;
-                      const weight = W2[i][0];
-                      const lineWidth = Math.min(Math.abs(weight) * 5, 8);
-                      
-                      ctx.beginPath();
-                      ctx.moveTo(hiddenX + nodeRadius, 150);
-                      ctx.lineTo(outputX - nodeRadius, outputY);
-                      ctx.strokeStyle = weight >= 0 ? 'blue' : 'red';
-                      ctx.lineWidth = lineWidth;
-                      ctx.stroke();
-                  }
-                  
-                  // Reset stroke style
-                  ctx.strokeStyle = 'black';
-                  ctx.lineWidth = 1;
-              }
-              
-              // Event listeners
-              document.getElementById('trainStep').addEventListener('click', trainStep);
-              
-              document.getElementById('train100').addEventListener('click', function() {
-                  let totalError = 0;
-                  for (let i = 0; i < 100; i++) {
-                      totalError += trainStep();
-                  }
-                  console.log(`Average error after 100 steps: ${(totalError / 100).toFixed(4)}`);
-              });
-              
-              document.getElementById('reset').addEventListener('click', resetNetwork);
-              
-              // Initialize
-              function initialize() {
-                  resetNetwork();
-              }
-              initialize();
-          </script>
+       
       
     </div>
 
-<section id="thought-experiment" class="implementation-note">
-  <h3>Food for Thought: Voice Interpolation</h3>
-  <p>
-    Think about this—what if we could map the voices of two famous singers, like Arijit Singh and Atif Aslam, and then find a smooth path from one voice to the other? Kind of like moving a slider from one style to the next. That would be amazing, right?
-  </p>
-  
-  <p>
-    Now take it a step further—what if you could see how close your voice is to your favorite singer's? Just like with face filters where you can see how your face compares to someone else's, we could do something similar with voice. You could actually learn how your voice is different, and maybe even change it to sound more like theirs.
-  </p>
-  
-  <p>
-    The idea sounds fun—and the possibilities are endless!
-  </p>
-</section>
+
 
       <h2>Types of Autoencoders</h2>
       <p>There are several variations of autoencoders, each with specific applications:</p>
@@ -928,6 +590,14 @@
         <div class="math-formula">
           \[ \mathcal{L}(\theta) = \frac{1}{N}\sum_{i=1}^N \|\mathbf{x}_i - g_\theta(f_\theta(\mathbf{x}_i))\|^2 \]
           <p class="formula-caption">where \(f_\theta\) is the encoder and \(g_\theta\) is the decoder</p>
+        </div>
+        <div class="animation-container">
+            <h3>Network Architecture Animation</h3>
+            <canvas id="standardAutoencoder" width="600" height="200"></canvas>
+            <div class="animation-controls">
+                <button onclick="toggleAnimation()">Play/Pause</button>
+                <button onclick="resetAnimation()">Reset</button>
+            </div>
         </div>
       </div>
       
@@ -955,6 +625,14 @@
         <p>The VAE loss function has two components: the reconstruction loss and the KL divergence between the encoder's distribution and a prior distribution.</p>
         <div class="math-formula">
           \[ \mathcal{L}(\phi, \theta, \mathbf{x}) = -\mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z}|\mathbf{x})}[\log p_\theta(\mathbf{x}|\mathbf{z})] + D_{\text{KL}}(q_\phi(\mathbf{z}|\mathbf{x}) \| p(\mathbf{z})) \]
+        </div>
+        <div class="animation-container">
+            <h3>VAE Architecture Animation</h3>
+            <canvas id="vaeFlow" width="600" height="200"></canvas>
+            <div class="animation-controls">
+                <button onclick="toggleAnimation()">Play/Pause</button>
+                <button onclick="resetAnimation()">Reset</button>
+            </div>
         </div>
       </div>
       
@@ -998,6 +676,20 @@
   <p>
     Statisticians call evaluation inside the convex hull of training points “interpolation,” which is generally safer than extrapolating outside that hull .
   </p>
+  <section id="thought-experiment" class="implementation-note">
+    <h3>Food for Thought: Voice Interpolation</h3>
+    <p>
+      Think about this—what if we could map the voices of two famous singers, like Arijit Singh and Atif Aslam, and then find a smooth path from one voice to the other? Kind of like moving a slider from one style to the next. That would be amazing, right?
+    </p>
+    
+    <p>
+      Now take it a step further—what if you could see how close your voice is to your favorite singer's? Just like with face filters where you can see how your face compares to someone else's, we could do something similar with voice. You could actually learn how your voice is different, and maybe even change it to sound more like theirs.
+    </p>
+    
+    <p>
+      The idea sounds fun—and the possibilities are endless!
+    </p>
+  </section>
   <div class="implementation-note">
     <p>💡 To see convex interpolation in action with implementation details, visit <a href="https://www.kaggle.com/code/soumyasavarn/everything-about-autoencoders/notebook?scriptVersionId=238355572#Appendix-2:-Convex-Interpolation" target="_blank">Appendix 2 of the companion notebook</a>.</p>
   </div>
@@ -1094,7 +786,14 @@
     <img src="images/poes.png" alt="Product of Experts Architecture" class="architecture-img">
     <p class="img-caption">Product of Experts (PoE) combining multiple modality encoders</p>
   </div>
-
+  <div class="animation-container">
+      <h3>Multimodal VAE Architecture Animation</h3>
+      <canvas id="multimodalFlow" width="600" height="300"></canvas>
+      <div class="animation-controls">
+          <button onclick="toggleAnimation()">Play/Pause</button>
+          <button onclick="resetAnimation()">Reset</button>
+      </div>
+  </div>
 </div>
 
 <section id="references">
@@ -1122,8 +821,9 @@
   <ul class="reference-list">
     <li><strong>Code Assistance:</strong>
       <ul>
-        <li>Claude 3.5 Sonnet - JavaScript interactivity and animations</li>
+        <li>Claude 3.7 Sonnet - JavaScript interactivity and animations</li>
         <li>GitHub Copilot - Image placement and layout assistance</li>
+        <li>Microsoft OneNote - For explanation in the video</li>
       </ul>
     </li>
     <li><strong>Deployment:</strong> Vercel</li>
@@ -1153,274 +853,80 @@
         </script>
 
 <script>
-// Add animation container divs after each respective section
-const animations = `
-<div class="animation-container">
-    <canvas id="standardAutoencoder" width="600" height="200"></canvas>
-    <canvas id="vaeFlow" width="600" height="200"></canvas>
-    <canvas id="multimodalFlow" width="600" height="300"></canvas>
-    <div class="animation-controls">
-        <button onclick="toggleAnimation()">Play/Pause</button>
-        <button onclick="resetAnimation()">Reset</button>
-    </div>
-</div>
-`;
+// Add canvas elements first in the HTML sections
+function addCanvasElements() {
+    // Add to vanilla autoencoder section
+    document.querySelector('#vanilla-content').insertAdjacentHTML('beforeend', `
+        <div class="animation-container">
+            <h3>Network Architecture Animation</h3>
+            <canvas id="standardAutoencoder" width="600" height="200"></canvas>
+            <div class="animation-controls">
+                <button onclick="toggleAnimation()">Play/Pause</button>
+                <button onclick="resetAnimation()">Reset</button>
+            </div>
+        </div>
+    `);
 
-// Animation variables
-let animationFrame;
-let isAnimating = true;
-let t = 0;
+    // Add to VAE section
+    document.querySelector('#variational-content').insertAdjacentHTML('beforeend', `
+        <div class="animation-container">
+            <h3>VAE Architecture Animation</h3>
+            <canvas id="vaeFlow" width="600" height="200"></canvas>
+            <div class="animation-controls">
+                <button onclick="toggleAnimation()">Play/Pause</button>
+                <button onclick="resetAnimation()">Reset</button>
+            </div>
+        </div>
+    `);
 
-// Colors
-const colors = {
-    input: '#4CAF50',
-    latent: '#2196F3',
-    output: '#FF5722',
-    flow: '#9C27B0'
-};
-
-function drawStandardAutoencoder(ctx) {
-    ctx.clearRect(0, 0, 600, 200);
-    
-    const inputX = 100;
-    const hiddenX = 300;
-    const outputX = 500;
-    const nodeRadius = 15;
-    const nodeSpacing = 40;
-    const numInputNodes = 4;  // Increased number of nodes
-    
-    // Input layer (4 nodes)
-    for (let i = 0; i < numInputNodes; i++) {
-        const y = 100 + (i - (numInputNodes-1)/2) * nodeSpacing;
-        drawNode(ctx, inputX, y, colors.input);
-        ctx.fillStyle = 'black';
-        ctx.fillText(`x${i+1}`, inputX - 25, y);
-        
-        // Connection to hidden layer
-        const weight = Math.sin(t + i);
-        drawFlow(ctx, 
-            inputX + nodeRadius, y,
-            hiddenX - nodeRadius, 100,
-            t + i * 0.2
-        );
-    }
-    
-    // Hidden layer (1 node)
-    drawNode(ctx, hiddenX, 100, colors.latent);
-    ctx.fillStyle = 'black';
-    ctx.fillText('z', hiddenX, 100 - 25);
-    
-    // Output layer (4 nodes)
-    for (let i = 0; i < numInputNodes; i++) {
-        const y = 100 + (i - (numInputNodes-1)/2) * nodeSpacing;
-        drawNode(ctx, outputX, y, colors.output);
-        ctx.fillStyle = 'black';
-        ctx.fillText(`x'${i+1}`, outputX + 25, y);
-        
-        // Connection from hidden layer
-        const weight = Math.sin(t - i);
-        drawFlow(ctx,
-            hiddenX + nodeRadius, 100,
-            outputX - nodeRadius, y,
-            t + i * 0.2
-        );
-    }
+    // Add to MVAE section after the PoE discussion
+    document.querySelector('#mvae-motivation').insertAdjacentHTML('beforeend', `
+        <div class="animation-container">
+            <h3>Multimodal VAE Architecture Animation</h3>
+            <canvas id="multimodalFlow" width="600" height="300"></canvas>
+            <div class="animation-controls">
+                <button onclick="toggleAnimation()">Play/Pause</button>
+                <button onclick="resetAnimation()">Reset</button>
+            </div>
+        </div>
+    `);
 }
 
-function drawFlow(ctx, x1, y1, x2, y2, t) {
-    const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
-    gradient.addColorStop(0, 'rgba(156, 39, 176, 0.1)');
-    gradient.addColorStop((1 + Math.sin(t * 2)) / 2, 'rgba(156, 39, 176, 0.8)');
-    gradient.addColorStop(1, 'rgba(156, 39, 176, 0.1)');
+// Modified initialization code
+document.addEventListener('DOMContentLoaded', () => {
+    // Add canvas elements first
+    addCanvasElements();
     
-    // Draw connection line
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.strokeStyle = gradient;
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    // Initialize variables
+    window.animationFrame = null;
+    window.isAnimating = true;
+    window.t = 0;
     
-    // Add flow particles
-    const numParticles = 3;
-    for(let i = 0; i < numParticles; i++) {
-        const progress = (t + i/numParticles) % 1;
-        const x = x1 + (x2 - x1) * progress;
-        const y = y1 + (y2 - y1) * progress;
-        
-        ctx.beginPath();
-        ctx.arc(x, y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(156, 39, 176, 0.8)';
-        ctx.fill();
-    }
-}
-
-function drawNode(ctx, x, y, color, label = '') {
-    ctx.beginPath();
-    ctx.arc(x, y, 15, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.stroke();
-    
-    if (label) {
-        ctx.fillStyle = '#000';
-        ctx.textAlign = 'center';
-        ctx.fillText(label, x, y + 30);
-    }
-}
-
-function drawVAE(ctx) {
-    ctx.clearRect(0, 0, 600, 200);
-    
-    // Draw mean and variance paths
-    const y = Math.sin(t) * 5;
-    
-    // Input
-    drawNode(ctx, 100, 100, colors.input);
-    // Mean & variance
-    drawNode(ctx, 300, 80 - y, colors.latent);
-    drawNode(ctx, 300, 120 + y, colors.latent);
-    // Sampled z
-    drawNode(ctx, 400, 100, colors.flow);
-    // Output
-    drawNode(ctx, 500, 100, colors.output);
-    
-    // Draw distributions and sampling
-    drawDistribution(ctx, 300, 100, t);
-    drawFlow(ctx, 400, 100, 500, 100, t);
-}
-
-function drawMultimodalFlow(ctx) {
-    ctx.clearRect(0, 0, 600, 300);
-    
-    // Draw multiple inputs
-    const x = Math.sin(t) * 10;
-    
-    // Input modalities
-    drawNode(ctx, 100, 50, '#E91E63', 'Image');
-    drawNode(ctx, 100, 150, '#009688', 'Text');
-    drawNode(ctx, 100, 250, '#FF9800', 'Audio');
-    
-    // Individual encoders
-    drawNode(ctx, 250, 50, colors.latent);
-    drawNode(ctx, 250, 150, colors.latent);
-    drawNode(ctx, 250, 250, colors.latent);
-    
-    // Merged representation
-    drawNode(ctx, 400, 150, colors.flow, 'PoE');
-    
-    // Output reconstructions
-    drawNode(ctx, 550, 50, '#E91E63');
-    drawNode(ctx, 550, 150, '#009688');
-    drawNode(ctx, 550, 250, '#FF9800');
-    
-    // Draw flows
-    drawFlow(ctx, 100, 50, 250, 50, t);
-    drawFlow(ctx, 100, 150, 250, 150, t);
-    drawFlow(ctx, 100, 250, 250, 250, t);
-    
-    // Merge flows
-    drawFlow(ctx, 250, 50, 400, 150, t);
-    drawFlow(ctx, 250, 150, 400, 150, t);
-    drawFlow(ctx, 250, 250, 400, 150, t);
-    
-    // Output flows
-    drawFlow(ctx, 400, 150, 550, 50, t);
-    drawFlow(ctx, 400, 150, 550, 150, t);
-    drawFlow(ctx, 400, 150, 550, 250, t);
-}
-
-function drawDistribution(ctx, x, y, t) {
-    const variance = 20 + Math.sin(t) * 5;
-    ctx.beginPath();
-    for (let i = -30; i < 30; i++) {
-        const x1 = x + i;
-        const y1 = y + Math.exp(-(i * i) / (2 * variance)) * 30;
-        if (i === -30) ctx.moveTo(x1, y1);
-        else ctx.lineTo(x1, y1);
-    }
-    ctx.strokeStyle = colors.flow;
-    ctx.stroke();
-}
-
-function animate() {
-    if (!isAnimating) return;
-    
-    t += 0.05;
-    
+    // Get canvas contexts
     const standardCtx = document.getElementById('standardAutoencoder').getContext('2d');
     const vaeCtx = document.getElementById('vaeFlow').getContext('2d');
     const multimodalCtx = document.getElementById('multimodalFlow').getContext('2d');
     
+    // Initial draw
     drawStandardAutoencoder(standardCtx);
     drawVAE(vaeCtx);
     drawMultimodalFlow(multimodalCtx);
     
-    animationFrame = requestAnimationFrame(animate);
-}
-
-function toggleAnimation() {
-    isAnimating = !isAnimating;
-    if (isAnimating) animate();
-}
-
-function resetAnimation() {
-    t = 0;
-    if (!isAnimating) {
-        const standardCtx = document.getElementById('standardAutoencoder').getContext('2d');
-        const vaeCtx = document.getElementById('vaeFlow').getContext('2d');
-        const multimodalCtx = document.getElementById('multimodalFlow').getContext('2d');
-        
-        drawStandardAutoencoder(standardCtx);
-        drawVAE(vaeCtx);
-        drawMultimodalFlow(multimodalCtx);
-    }
-}
-
-// Add necessary styles
-const styles = `
-<style>
-.animation-container {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin: 20px 0;
-}
-
-.animation-controls {
-    text-align: center;
-    margin-top: 10px;
-}
-
-.animation-controls button {
-    margin: 0 5px;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    background: var(--primary-color);
-    color: white;
-    cursor: pointer;
-}
-
-.animation-controls button:hover {
-    background: var(--accent-color);
-}
-
-canvas {
-    width: 100%;
-    height: auto;
-    margin: 10px 0;
-}
-</style>
-`;
-
-// Initialize animations when document loads
-document.addEventListener('DOMContentLoaded', () => {
-    // Add animations after respective sections
-    document.querySelector('#vanilla-content').insertAdjacentHTML('beforeend', animations);
-    document.head.insertAdjacentHTML('beforeend', styles);
+    // Start animation
     animate();
+    
+    // Add tab functionality
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            tab.classList.add('active');
+            document.getElementById(`${tab.dataset.tab}-content`).classList.add('active');
+        });
+    });
 });
 </script>
 
