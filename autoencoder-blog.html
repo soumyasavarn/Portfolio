@@ -166,6 +166,12 @@
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
 .notebook-reference {
     background: #f8f9fa;
     border-left: 4px solid #0366d6;
@@ -186,10 +192,6 @@
 .implementation-note h3 {
     margin-top: 0;
     color: #0366d6;
-}
-.tab-content.active {
-    display: block;
-    animation: fadeIn 0.3s ease-in;
 }
 
 @keyframes fadeIn {
@@ -376,6 +378,89 @@
     color: var(--primary-color);
     font-size: 1.2em;
 }
+
+.example-details {
+    background: #f8f9fa;
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+}
+
+.calculation-steps {
+    background: #fff;
+    padding: 20px;
+    border-left: 4px solid var(--accent-color);
+    margin: 16px 0;
+}
+
+.code-block {
+    background: var(--code-bg);
+    padding: 12px;
+    border-radius: 4px;
+    font-family: 'Consolas', monospace;
+    font-size: 0.9em;
+    margin: 8px 0;
+}
+
+.calculation-steps pre {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 4px;
+    margin: 8px 0;
+}
+
+.calculation-steps h4 {
+    color: var(--primary-color);
+    margin-top: 24px;
+}
+
+.key-observations {
+    background: #fff3e0;
+    padding: 16px;
+    border-left: 4px solid #ffb347;
+    margin-top: 24px;
+    border-radius: 4px;
+}
+
+.example-details {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 24px 0;
+}
+
+.animation-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin: 20px 0;
+}
+
+.animation-controls {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.animation-controls button {
+    margin: 0 5px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    background: var(--primary-color);
+    color: white;
+    cursor: pointer;
+}
+
+.animation-controls button:hover {
+    background: var(--accent-color);
+}
+
+canvas {
+    width: 100%;
+    height: auto;
+    margin: 10px 0;
+}
   </style> </head> <body> <div id="main" style="padding: 32px 15vw;"> <a href="index.html" class="back-btn">&larr; Back to Home</a>
   <article class="blog-post">
     <h1>Everything about Autoencoders: From Linear Algebra to its Multimodal and Cross-modal Generative Capabilities</h1>
@@ -396,9 +481,10 @@
       </section>
 
       <h2>Introduction</h2>
-      <p>Autoencoders are a type of artificial neural network used for unsupervised learning. Their primary goal is to learn efficient representations of input data, typically for dimensionality reduction or noise removal. The architecture consists of an <b>encoder</b> that compresses the input, a <b>bottleneck</b> that stores the compressed knowledge, and a <b>decoder</b> that reconstructs the original data from this compressed form. <div class="notebook-reference">
-        <p>All code implementations discussed in this blog can be found in this <a href="https://www.kaggle.com/code/soumyasavarn/everything-about-autoencoders/notebook?scriptVersionId=238355572" target="_blank">Kaggle notebook</a>.</p>
-      </div></p>
+      <p>Autoencoders are a type of artificial neural network used for unsupervised learning. Their primary goal is to learn efficient representations of input data, typically for dimensionality reduction or noise removal. The architecture consists of an <b>encoder</b> that compresses the input, a <b>bottleneck</b> that stores the compressed knowledge, and a <b>decoder</b> that reconstructs the original data from this compressed form. 
+      </p>
+      <div class="implementation-note"> All code implementations discussed in this blog can be found in this <a href="https://www.kaggle.com/code/soumyasavarn/everything-about-autoencoders/notebook?scriptVersionId=238355572" target="_blank">Kaggle notebook</a>.
+      </div>
       
       <div class="visualization-container">
         <img src="images/diagram-auto.png" alt="General Autoencoder Architecture" class="architecture-img">
@@ -406,6 +492,14 @@
       </div>
 
       <p>In this blog, we'll explore autoencoders from their mathematical foundations to advanced applications in multimodal learning. We'll also implement interactive visualizations to help you understand how autoencoders work.</p>
+
+      <div class="animation-container">
+        <canvas id="standardAutoencoder" width="800" height="300"></canvas>
+        <div class="animation-controls">
+            <button onclick="toggleAnimation('standard')">Play/Pause</button>
+            <button onclick="resetAnimation('standard')">Reset</button>
+        </div>
+      </div>
       
       <h2>Autoencoder vs U-Net: Understanding the Differences</h2>
       <div class="comparison-container">
@@ -445,16 +539,12 @@
         </table>
       </div>
       
-      <div class="visualization-container">
-        <h3>Autoencoder Architecture</h3>
-        <img src="images/autoencoder-architecture.png" alt="Autoencoder Architecture showing encoder, bottleneck, and decoder" class="architecture-img">
-        <p class="img-caption">Basic architecture of an autoencoder showing the encoding and decoding process</p>
-      </div>
+      
       
       <h2>Mathematical Foundation</h2>
       <p>An autoencoder is defined by two main components: an <span class="highlight">encoder function</span> that transforms the input data, and a <span class="highlight">decoder function</span> that recreates the input data from the encoded representation.</p>
       
-      <p>Formally, for input space $$X$$ and encoded space $$Z$$, we define:</p>
+      <p>Formally, for input space X and encoded space Z, we define:</p>
       <div class="math-formula">
         \[ \text{Encoder}: f_\phi: \mathcal{X} \rightarrow \mathcal{Z} \]
         \[ \text{Decoder}: g_\theta: \mathcal{Z} \rightarrow \mathcal{X} \]
@@ -467,7 +557,7 @@
       
       <p>Surprisingly, for linear autoencoders (using only linear activations), the optimal solution is equivalent to Principal Component Analysis (PCA). This mathematical connection is well-explained in <a href="https://www.cse.iitm.ac.in/~miteshk/CS7015/Slides/Teaching/src/Lecture7/modules/Module2/Lecture7_2.pdf" target="_blank">these lecture notes from IIT Madras's Deep Learning course</a> and rigorously proven in <a href="https://arxiv.org/abs/1804.10253" target="_blank">this paper by Plaut (2018)</a>. The linear autoencoder learns to project data onto the principal subspace, just like PCA.</p>
       <div class="implementation-note">
-        <p>💡 For practical implementation of linear autoencoders and their equivalence to PCA, check <a href="https://www.kaggle.com/code/soumyasavarn/everything-about-autoencoders/notebook?scriptVersionId=238355572#Appendix-1:-Linear-Autoencoders-and-PCA" target="_blank">Appendix 1 of the companion notebook</a>.</p>
+        <p>💡 For practical implementation of linear autoencoders and their equivalence to PCA, check <a href="https://www.kaggle.com/code/soumyasavarn/everything-about-autoencoders/notebook?scriptVersionId=238355572#Appendix-1:-Linear-Autoencoders-and-PCA" target="_blank">Appendix 1 of the  notebook</a>.</p>
       </div>
       
       <div class="visualization-container comparison-grid">
@@ -552,6 +642,7 @@
           <h3>Recirculation:</h3>
           \[ h_{rec} = \sigma(W_2^T y) \]
           <p class="formula-caption">where \(W_2^T\) is the transpose of the decoder weights</p>
+          The above formula holds true only when we are enforcing \[W_2^T = W_1\].
         </div>
 
         <div class="math-formula">
@@ -567,7 +658,135 @@
           <li><strong>Hardware Efficiency:</strong> Well-suited for neuromorphic computing systems</li>
         </ul>
 
-       
+        <div class="implementation-note">
+          <h3>Worked Example: 2→1→2 Linear Recirculation Autoencoder</h3>
+          <p>Let's see how the recirculation algorithm works in practice with a simple example:</p>
+
+          <div class="example-details">
+            <ul>
+              <li><strong>Architecture:</strong> 2 input units → 1 hidden unit → 2 output units</li>
+              <li><strong>Activation:</strong> Linear (no nonlinearity)</li>
+              <li><strong>Learning rate:</strong> 0.1</li>
+              <li><strong>Initial Weights:</strong></li>
+            </ul>
+            <pre class="code-block">
+W1 = [[ 0.1], [-0.1]]  # 2×1 matrix
+W2 = [[ 0.2, -0.3]]    # 1×2 matrix</pre>
+          </div>
+
+          <div class="calculation-steps">
+            <h4>Training Example: x = [1, 0]</h4>
+            <ol>
+              <li>Forward pass:
+                <ul>
+                  <li>h = W1ᵀx = 0.1</li>
+                  <li>y = W2h = [0.02, -0.03]</li>
+                </ul>
+              </li>
+              <li>Recirculation:
+                <ul>
+                  <li>hrec = W1ᵀy = 0.005</li>
+                  <li>yrec = W2hrec = [0.001, -0.0015]</li>
+                </ul>
+              </li>
+              <li>Weight updates:
+                <ul>
+                  <li>ΔW1 = η(hrec - h)x = 0.1(0.005 - 0.1)[1, 0]ᵀ</li>
+                  <li>Updated W1 = [[0.109995], [-0.0999925]]</li>
+                </ul>
+              </li>
+            </ol>
+          </div>
+
+          <div class="math-formula">
+            <p>The process continues iteratively, gradually improving reconstruction quality.</p>
+          </div>
+        </div>
+
+        <div class="example-details">
+          <h3>Detailed Step-by-Step Calculation</h3>
+          
+          <h4>Initial Setup:</h4>
+          <pre class="code-block">
+Input x = [1, 0]   # 2D input vector
+W1 = [[ 0.1],      # 2×1 encoder matrix
+      [-0.1]]      
+W2 = [[ 0.2, -0.3]]# 1×2 decoder matrix
+Learning rate η = 0.1</pre>
+        
+          <div class="calculation-steps">
+            <h4>1. Forward Pass</h4>
+            <ol>
+              <li>Calculate hidden representation h:
+                <pre class="code-block">
+h = W1ᵀx
+h = [0.1, -0.1] · [1, 0]
+h = 0.1 · 1 + (-0.1) · 0
+h = 0.1</pre>
+              </li>
+              <li>Calculate output y:
+                <pre class="code-block">
+y = W2h
+y = [[0.2, -0.3]] · [0.1]
+y = [0.2 · 0.1, -0.3 · 0.1]
+y = [0.02, -0.03]</pre>
+              </li>
+            </ol>
+        
+            <h4>2. Recirculation Phase</h4>
+            <ol>
+              <li>Calculate recirculated hidden state hrec:
+                <pre class="code-block">
+hrec = W1ᵀy
+hrec = [0.1, -0.1] · [0.02, -0.03]
+hrec = 0.1 · 0.02 + (-0.1) · (-0.03)
+hrec = 0.002 + 0.003
+hrec = 0.005</pre>
+              </li>
+              <li>Calculate recirculated output yrec:
+                <pre class="code-block">
+yrec = W2hrec
+yrec = [[0.2, -0.3]] · [0.005]
+yrec = [0.2 · 0.005, -0.3 · 0.005]
+yrec = [0.001, -0.0015]</pre>
+              </li>
+            </ol>
+        
+            <h4>3. Weight Updates</h4>
+            <ol>
+              <li>Calculate error term:
+                <pre class="code-block">
+error = hrec - h
+error = 0.005 - 0.1
+error = -0.095</pre>
+              </li>
+              <li>Calculate weight updates:
+                <pre class="code-block">
+ΔW1 = η(hrec - h)xᵀ
+ΔW1 = 0.1 · (-0.095) · [1, 0]
+ΔW1 = [[-0.0095],
+       [0]]</pre>
+              </li>
+              <li>Update weights:
+                <pre class="code-block">
+W1_new = W1 + ΔW1
+W1_new = [[0.1],    + [[-0.0095],
+          [-0.1]]     [0]]
+W1_new = [[0.109995],
+          [-0.0999925]]</pre>
+              </li>
+            </ol>
+          </div>
+        
+          <div class="key-observations">
+            <h4>Key Observations:</h4>
+            <ul>
+              <li>The recirculation error (-0.095) indicates how far the recirculated hidden state is from the original</li>
+              <li>Only the first row of W1 gets updated significantly because x = [1, 0]</li>
+              <li>The weight update moves W1 in a direction that would make hrec closer to h in the next iteration</li>
+            </ul>
+          </div>
+        </div>
       
     </div>
 
@@ -591,14 +810,7 @@
           \[ \mathcal{L}(\theta) = \frac{1}{N}\sum_{i=1}^N \|\mathbf{x}_i - g_\theta(f_\theta(\mathbf{x}_i))\|^2 \]
           <p class="formula-caption">where \(f_\theta\) is the encoder and \(g_\theta\) is the decoder</p>
         </div>
-        <div class="animation-container">
-            <h3>Network Architecture Animation</h3>
-            <canvas id="standardAutoencoder" width="600" height="200"></canvas>
-            <div class="animation-controls">
-                <button onclick="toggleAnimation()">Play/Pause</button>
-                <button onclick="resetAnimation()">Reset</button>
-            </div>
-        </div>
+
       </div>
       
       <div class="tab-content" id="sparse-content">
@@ -626,14 +838,7 @@
         <div class="math-formula">
           \[ \mathcal{L}(\phi, \theta, \mathbf{x}) = -\mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z}|\mathbf{x})}[\log p_\theta(\mathbf{x}|\mathbf{z})] + D_{\text{KL}}(q_\phi(\mathbf{z}|\mathbf{x}) \| p(\mathbf{z})) \]
         </div>
-        <div class="animation-container">
-            <h3>VAE Architecture Animation</h3>
-            <canvas id="vaeFlow" width="600" height="200"></canvas>
-            <div class="animation-controls">
-                <button onclick="toggleAnimation()">Play/Pause</button>
-                <button onclick="resetAnimation()">Reset</button>
-            </div>
-        </div>
+
       </div>
       
       <div class="tab-content" id="convolutional-content">
@@ -652,6 +857,14 @@
       <p>Autoencoders serve multiple purposes in machine learning and data science. They excel at dimensionality reduction by compressing high-dimensional data while preserving key features. Their ability to learn normal data patterns makes them effective for anomaly detection through reconstruction error analysis. In image processing, denoising autoencoders can clean corrupted images. The encoded representations provide valuable features for downstream tasks like classification. Additionally, variants like variational autoencoders enable generative modeling, creating new data samples that mirror the training distribution.</p>
 
       <p>Let's explore <strong>Variational Autoencoders</strong> (VAEs) and their fascinating applications in multimodal learning. For a rigorous mathematical treatment and detailed proofs, I highly recommend referring to <a href="https://arxiv.org/pdf/1606.05908" target="_blank">this seminal paper</a> on multimodal VAEs.</p>
+
+      <div class="animation-container">
+        <canvas id="vaeAutoencoder" width="800" height="300"></canvas>
+        <div class="animation-controls">
+            <button onclick="toggleAnimation('vae')">Play/Pause</button>
+            <button onclick="resetAnimation('vae')">Reset</button>
+        </div>
+      </div>
 
        <!-- Convex Interpolation in VAEs -->
 <section id="convex-interpolation">
@@ -690,15 +903,15 @@
       The idea sounds fun—and the possibilities are endless!
     </p>
   </section>
-  <div class="implementation-note">
-    <p>💡 To see convex interpolation in action with implementation details, visit <a href="https://www.kaggle.com/code/soumyasavarn/everything-about-autoencoders/notebook?scriptVersionId=238355572#Appendix-2:-Convex-Interpolation" target="_blank">Appendix 2 of the companion notebook</a>.</p>
-  </div>
+  
 
   <div class="visualization-container">
     <img src="images/convex.png" alt="Convex Interpolation in Latent Space" class="architecture-img">
     <p class="img-caption">Visualization of convex interpolation in the VAE latent space</p>
   </div>
-
+  <div class="implementation-note">
+    <p>💡 To see convex interpolation in action with implementation details, visit <a href="https://www.kaggle.com/code/soumyasavarn/everything-about-autoencoders/notebook?scriptVersionId=238355572#Appendix-2:-Convex-Interpolation" target="_blank">Appendix 2 of the Kaggle notebook</a>.</p>
+  </div>
 </section>
 
 <!-- Insights from “Multimodal Generative Models for Scalable Weakly‑Supervised Learning” -->
@@ -734,6 +947,10 @@
     code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 4px; }
     .example { background-color: #eef; padding: 10px; border-left: 4px solid #88f; margin: 10px 0; }
   </style>
+<div class="visualization-container">
+  <img src="images/poes.png" alt="Product of Experts Architecture" class="architecture-img">
+  <p class="img-caption">Product of Experts (PoE) combining multiple modality encoders</p>
+</div>
 
   <p>A Variational Autoencoder (VAE) models data <em>x</em> using a latent variable <em>z</em>, with a prior <code>p(z)</code> (often a standard Gaussian) and a decoder <code>p<sub>θ</sub>(x|z)</code> implemented by a neural network. Because the true data likelihood is hard to compute, we optimize the <strong>Evidence Lower Bound (ELBO)</strong> instead:</p>
   <pre><code>ELBO(x) = E<sub>q<sub>φ</sub>(z|x)</sub>[log p<sub>θ</sub>(x|z)] - KL(q<sub>φ</sub>(z|x) || p(z))</code></pre>
@@ -779,21 +996,10 @@
 
   <p>This simple approach lets us handle any combination of missing modalities without training separate encoders for each subset!</p>
   <div class="implementation-note">
-    <p>💡 For a complete implementation of the Product of Experts (PoE) approach, check out <a href="https://www.kaggle.com/code/soumyasavarn/everything-about-autoencoders/notebook?scriptVersionId=238355572#Appendix-3:-Product-of-Experts" target="_blank">Appendix 3 of the companion notebook</a>.</p>
+    <p>💡 For a complete implementation of the Product of Experts (PoE) approach, check out <a href="https://www.kaggle.com/code/soumyasavarn/everything-about-autoencoders/notebook?scriptVersionId=238355572#Appendix-3:-Product-of-Experts" target="_blank">Appendix 3 of the  notebook</a>.</p>
   </div>
 
-  <div class="visualization-container">
-    <img src="images/poes.png" alt="Product of Experts Architecture" class="architecture-img">
-    <p class="img-caption">Product of Experts (PoE) combining multiple modality encoders</p>
-  </div>
-  <div class="animation-container">
-      <h3>Multimodal VAE Architecture Animation</h3>
-      <canvas id="multimodalFlow" width="600" height="300"></canvas>
-      <div class="animation-controls">
-          <button onclick="toggleAnimation()">Play/Pause</button>
-          <button onclick="resetAnimation()">Reset</button>
-      </div>
-  </div>
+  
 </div>
 
 <section id="references">
@@ -834,101 +1040,183 @@
         // Initialize tab functionality
         document.addEventListener('DOMContentLoaded', () => {
             const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
             
+            // Set initial state
+            contents.forEach(content => content.style.display = 'none');
+            document.querySelector('#vanilla-content').style.display = 'block';
+            document.querySelector('[data-tab="vanilla"]').classList.add('active');
+            
+            // Add click handlers to tabs
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
-                    // Remove active class from all tabs and content
+                    // Remove active class from all tabs
                     tabs.forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
                     
-                    // Add active class to clicked tab and corresponding content
+                    // Hide all content sections
+                    contents.forEach(content => content.style.display = 'none');
+                    
+                    // Add active class to clicked tab
                     tab.classList.add('active');
+                    
+                    // Show corresponding content
                     const contentId = `${tab.dataset.tab}-content`;
-                    document.getElementById(contentId).classList.add('active');
+                    document.getElementById(contentId).style.display = 'block';
                 });
             });
         });
-        </script>
 
-<script>
-// Add canvas elements first in the HTML sections
-function addCanvasElements() {
-    // Add to vanilla autoencoder section
-    document.querySelector('#vanilla-content').insertAdjacentHTML('beforeend', `
-        <div class="animation-container">
-            <h3>Network Architecture Animation</h3>
-            <canvas id="standardAutoencoder" width="600" height="200"></canvas>
-            <div class="animation-controls">
-                <button onclick="toggleAnimation()">Play/Pause</button>
-                <button onclick="resetAnimation()">Reset</button>
-            </div>
-        </div>
-    `);
+        let animationFrames = {};
+        let isAnimating = {standard: true, vae: true};
+        let t = {standard: 0, vae: 0};
 
-    // Add to VAE section
-    document.querySelector('#variational-content').insertAdjacentHTML('beforeend', `
-        <div class="animation-container">
-            <h3>VAE Architecture Animation</h3>
-            <canvas id="vaeFlow" width="600" height="200"></canvas>
-            <div class="animation-controls">
-                <button onclick="toggleAnimation()">Play/Pause</button>
-                <button onclick="resetAnimation()">Reset</button>
-            </div>
-        </div>
-    `);
+        const colors = {
+            input: '#4CAF50',
+            hidden: '#2196F3',
+            output: '#FF5722',
+            flow: '#9C27B0',
+            distribution: '#FFC107'
+        };
 
-    // Add to MVAE section after the PoE discussion
-    document.querySelector('#mvae-motivation').insertAdjacentHTML('beforeend', `
-        <div class="animation-container">
-            <h3>Multimodal VAE Architecture Animation</h3>
-            <canvas id="multimodalFlow" width="600" height="300"></canvas>
-            <div class="animation-controls">
-                <button onclick="toggleAnimation()">Play/Pause</button>
-                <button onclick="resetAnimation()">Reset</button>
-            </div>
-        </div>
-    `);
-}
+        function drawNode(ctx, x, y, color, label = '') {
+            ctx.beginPath();
+            ctx.arc(x, y, 15, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = '#333';
+            ctx.stroke();
+            
+            if (label) {
+                ctx.fillStyle = '#333';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, x, y + 30);
+            }
+        }
 
-// Modified initialization code
-document.addEventListener('DOMContentLoaded', () => {
-    // Add canvas elements first
-    addCanvasElements();
-    
-    // Initialize variables
-    window.animationFrame = null;
-    window.isAnimating = true;
-    window.t = 0;
-    
-    // Get canvas contexts
-    const standardCtx = document.getElementById('standardAutoencoder').getContext('2d');
-    const vaeCtx = document.getElementById('vaeFlow').getContext('2d');
-    const multimodalCtx = document.getElementById('multimodalFlow').getContext('2d');
-    
-    // Initial draw
-    drawStandardAutoencoder(standardCtx);
-    drawVAE(vaeCtx);
-    drawMultimodalFlow(multimodalCtx);
-    
-    // Start animation
-    animate();
-    
-    // Add tab functionality
-    const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            tab.classList.add('active');
-            document.getElementById(`${tab.dataset.tab}-content`).classList.add('active');
+        function drawFlow(ctx, x1, y1, x2, y2, t) {
+            const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+            const progress = (Math.sin(t * 2) + 1) / 2;
+            
+            gradient.addColorStop(0, 'rgba(156, 39, 176, 0.1)');
+            gradient.addColorStop(progress, 'rgba(156, 39, 176, 0.8)');
+            gradient.addColorStop(1, 'rgba(156, 39, 176, 0.1)');
+            
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawStandardAutoencoder(ctx) {
+            ctx.clearRect(0, 0, 800, 300);
+            const inputX = 100;
+            const hiddenX = 400;
+            const outputX = 700;
+            
+            // Draw input nodes
+            for (let i = 0; i < 4; i++) {
+                const y = 100 + i * 50;
+                drawNode(ctx, inputX, y, colors.input, `x${i+1}`);
+                
+                // Connections to hidden nodes
+                drawFlow(ctx, inputX + 15, y, hiddenX - 15, 125, t.standard + i * 0.2);
+                drawFlow(ctx, inputX + 15, y, hiddenX - 15, 175, t.standard + i * 0.2);
+            }
+            
+            // Draw hidden nodes
+            drawNode(ctx, hiddenX, 125, colors.hidden, 'z1');
+            drawNode(ctx, hiddenX, 175, colors.hidden, 'z2');
+            
+            // Draw output nodes
+            for (let i = 0; i < 4; i++) {
+                const y = 100 + i * 50;
+                drawNode(ctx, outputX, y, colors.output, `x'${i+1}`);
+                
+                // Connections from hidden nodes
+                drawFlow(ctx, hiddenX + 15, 125, outputX - 15, y, t.standard + i * 0.2);
+                drawFlow(ctx, hiddenX + 15, 175, outputX - 15, y, t.standard + i * 0.2);
+            }
+        }
+
+        function drawVAE(ctx) {
+            ctx.clearRect(0, 0, 800, 300);
+            const inputX = 100;
+            const encoderX = 300;
+            const sampleX = 500;
+            const outputX = 700;
+            
+            // Draw input nodes
+            for (let i = 0; i < 4; i++) {
+                const y = 100 + i * 50;
+                drawNode(ctx, inputX, y, colors.input, `x${i+1}`);
+                
+                // Connections to encoder
+                drawFlow(ctx, inputX + 15, y, encoderX - 15, 125, t.vae + i * 0.2);
+                drawFlow(ctx, inputX + 15, y, encoderX - 15, 175, t.vae + i * 0.2);
+            }
+            
+            // Draw encoder output (μ, σ)
+            drawNode(ctx, encoderX, 125, colors.hidden, 'μ');
+            drawNode(ctx, encoderX, 175, colors.hidden, 'σ');
+            
+            // Draw sampling node
+            drawNode(ctx, sampleX, 150, colors.distribution, 'z');
+            
+            // Draw sampling process
+            ctx.beginPath();
+            ctx.moveTo(encoderX + 15, 150);
+            ctx.bezierCurveTo(
+                encoderX + 50, 150,
+                sampleX - 50, 150 + Math.sin(t.vae * 3) * 20,
+                sampleX - 15, 150
+            );
+            ctx.strokeStyle = colors.flow;
+            ctx.stroke();
+            
+            // Draw output nodes
+            for (let i = 0; i < 4; i++) {
+                const y = 100 + i * 50;
+                drawNode(ctx, outputX, y, colors.output, `x'${i+1}`);
+                drawFlow(ctx, sampleX + 15, 150, outputX - 15, y, t.vae + i * 0.2);
+            }
+        }
+
+        function animate() {
+            if (isAnimating.standard) {
+                t.standard += 0.05;
+                const standardCtx = document.getElementById('standardAutoencoder').getContext('2d');
+                drawStandardAutoencoder(standardCtx);
+            }
+            if (isAnimating.vae) {
+                t.vae += 0.05;
+                const vaeCtx = document.getElementById('vaeAutoencoder').getContext('2d');
+                drawVAE(vaeCtx);
+            }
+            animationFrames.standard = requestAnimationFrame(animate);
+        }
+
+        function toggleAnimation(type) {
+            isAnimating[type] = !isAnimating[type];
+        }
+
+        function resetAnimation(type) {
+            t[type] = 0;
+            const ctx = document.getElementById(`${type}Autoencoder`).getContext('2d');
+            if (type === 'standard') {
+                drawStandardAutoencoder(ctx);
+            } else {
+                drawVAE(ctx);
+            }
+        }
+
+        // Initialize animations when document loads
+        document.addEventListener('DOMContentLoaded', () => {
+            animate();
         });
-    });
-});
-</script>
+      </script>
 
      
     </div>
