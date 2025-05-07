@@ -388,16 +388,21 @@
       
       <p>Formally, for input space $$X$$ and encoded space $$Z$$, we define:</p>
       <div class="math-formula">
-        $$ \text{Encoder}: f_\phi: X \rightarrow Z $$
-        $$ \text{Decoder}: g_\theta: Z \rightarrow X $$
+        \[ \text{Encoder}: f_\phi: \mathcal{X} \rightarrow \mathcal{Z} \]
+        \[ \text{Decoder}: g_\theta: \mathcal{Z} \rightarrow \mathcal{X} \]
       </div>
       
       <p>The training objective is to minimize the reconstruction error:</p>
       <div class="math-formula">
-        $$ \mathcal{L}(\phi, \theta) = \sum_{x \in X} ||x - g_\theta(f_\phi(x))||^2 $$
+        \[ \mathcal{L}(\phi, \theta) = \frac{1}{N}\sum_{i=1}^N \|\mathbf{x}_i - g_\theta(f_\phi(\mathbf{x}_i))\|^2 \]
       </div>
       
-      <p>For linear autoencoders, this has an elegant solution related to Principal Component Analysis (PCA). The optimal linear autoencoder learns to project the data onto the principal subspace of the data.</p>
+      <p>Surprisingly, for linear autoencoders (using only linear activations), the optimal solution is equivalent to Principal Component Analysis (PCA). This mathematical connection is well-explained in <a href="https://www.cse.iitm.ac.in/~miteshk/CS7015/Slides/Teaching/src/Lecture7/modules/Module2/Lecture7_2.pdf" target="_blank">these lecture notes from IIT Madras's Deep Learning course</a> and rigorously proven in <a href="https://arxiv.org/abs/1804.10253" target="_blank">this paper by Plaut (2018)</a>. The linear autoencoder learns to project data onto the principal subspace, just like PCA.</p>
+
+      <div class="math-formula">
+        \[ \mathcal{L}(\phi, \theta) = \frac{1}{N}\sum_{i=1}^N \|\mathbf{x}_i - g_\theta(f_\phi(\mathbf{x}_i))\|^2 \]
+        <p class="formula-caption">Linear autoencoder loss function, which under optimal conditions yields PCA solution</p>
+      </div>
       
       <div class="visualization-container">
         <h2><strong>BONUS: </strong>Recirculation Algorithm</h2>
@@ -456,20 +461,20 @@
        
         <div class="math-formula">
           <h3>Forward Pass:</h3>
-          $$ h = \sigma(W_1 x) $$
-          $$ y = \sigma(W_2 h) $$
+          \[ h = \sigma(W_1 x) \]
+          \[ y = \sigma(W_2 h) \]
           <p class="formula-caption">where \(\sigma\) is the sigmoid activation function</p>
         </div>
 
         <div class="math-formula">
           <h3>Recirculation:</h3>
-          $$ h_{rec} = \sigma(W_2^T y) $$
+          \[ h_{rec} = \sigma(W_2^T y) \]
           <p class="formula-caption">where \(W_2^T\) is the transpose of the decoder weights</p>
         </div>
 
         <div class="math-formula">
           <h3>Weight Update:</h3>
-          $$ \Delta W_1 = \eta (h_{rec} - h) x^T $$
+          \[ \Delta W_1 = \eta (h_{rec} - h) x^T \]
           <p class="formula-caption">where \(\eta\) is the learning rate</p>
         </div>
 
@@ -480,16 +485,333 @@
           <li><strong>Hardware Efficiency:</strong> Well-suited for neuromorphic computing systems</li>
         </ul>
 
-        <div class="code-block">
-          <p>Network Architecture: 2→2→2</p>
-          <ul>
-            <li>Input layer (x): 2 nodes</li>
-            <li>Hidden layer (h): 2 nodes</li>
-            <li>Output layer (y): 2 nodes</li>
-          </ul>
+        <div class="visualization-container">
+            <h2>Recirculation Algorithm Visualization</h2>
+            <img src="recirculation.png" alt="Recirculation Algorithm Flow" class="architecture-img">
+            <p class="img-caption">Visual representation of the recirculation algorithm showing forward pass and backward recirculation</p>
         </div>
-      </div>
+    
+          <title>Recirculation Algorithm Visualization</title>
+          <style>
+              body {
+                  font-family: Arial, sans-serif;
+                  margin: 20px;
+              }
+              .container {
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+              }
+              canvas {
+                  border: 1px solid #ccc;
+                  margin: 10px 0;
+              }
+              .controls {
+                  margin: 15px 0;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+              }
+              button {
+                  padding: 8px 15px;
+                  margin: 5px;
+                  cursor: pointer;
+              }
+              .metrics {
+                  margin: 10px 0;
+                  padding: 10px;
+                  background-color: #f5f5f5;
+                  border-radius: 5px;
+                  width: 600px;
+              }
+              .layer-info {
+                  display: flex;
+                  justify-content: space-around;
+                  width: 600px;
+                  margin-top: 10px;
+              }
+          </style>
+     
+          <div class="container">
+              <h2>Recirculation Algorithm for 2→1→2 Autoencoder</h2>
+              <div class="controls">
+                  <button id="trainStep">Train Step</button>
+                  <button id="train100">Train 100 Steps</button>
+                  <button id="reset">Reset Network</button>
+              </div>
+              <canvas id="networkCanvas" width="600" height="300"></canvas>
+              <div class="metrics">
+                  <div id="errorDisplay">Reconstruction Error: 0.0</div>
+                  <div id="iterationDisplay">Iterations: 0</div>
+              </div>
+              <div class="layer-info">
+                  <div>
+                      <h3>Input Data</h3>
+                      <pre id="inputData"></pre>
+                  </div>
+                  <div>
+                      <h3>Weights</h3>
+                      <pre id="weightsDisplay"></pre>
+                  </div>
+                  <div>
+                      <h3>Reconstruction</h3>
+                      <pre id="reconstructionData"></pre>
+                  </div>
+              </div>
+          </div>
       
+          <script>
+              // Network parameters
+              const learningRate = 0.1;
+              let iterations = 0;
+              
+              // Initialize weights with small random values for 2→1→2 architecture
+              let W1 = [
+                  [Math.random() * 0.2 - 0.1], // 2×1 matrix
+                  [Math.random() * 0.2 - 0.1]
+              ];
+              
+              let W2 = [
+                  [Math.random() * 0.2 - 0.1], // 1×2 matrix
+                  [Math.random() * 0.2 - 0.1]
+              ];
+              
+              // Training data - simple patterns (unchanged)
+              const trainingData = [
+                  [0.1, 0.2],
+                  [0.2, 0.4],
+                  [1.0, 2.0],
+                  [0.4, 0.8]
+              ];
+              
+              let currentSampleIndex = 0;
+              
+              function sigmoid(x) {
+                  return 1 / (1 + Math.exp(-x));
+              }
+              
+              // Forward pass for 2→1→2 architecture
+              function forwardPass(x) {
+                  // Hidden layer (single node)
+                  const h = sigmoid(W1[0][0] * x[0] + W1[1][0] * x[1]);
+                  
+                  // Output layer
+                  const y = [0, 0];
+                  y[0] = sigmoid(W2[0][0] * h);
+                  y[1] = sigmoid(W2[1][0] * h);
+                  
+                  return { h, y };
+              }
+              
+              // Recirculation for 2→1→2 architecture
+              function recirculation(y) {
+                  // Single hidden node reconstruction
+                  const hRec = sigmoid(W2[0][0] * y[0] + W2[1][0] * y[1]);
+                  return hRec;
+              }
+              
+              // Weight update for 2→1→2 architecture
+              function updateWeights(x, h, hRec) {
+                  // Update W1 (2×1 matrix)
+                  W1[0][0] += learningRate * (hRec - h) * x[0];
+                  W1[1][0] += learningRate * (hRec - h) * x[1];
+                  
+                  // Update W2 (1×2 matrix)
+                  W2[0][0] += learningRate * (y[0] - x[0]) * h;
+                  W2[1][0] += learningRate * (y[1] - x[1]) * h;
+              }
+              
+              // Calculate reconstruction error
+              function calculateError(x, y) {
+                  return Math.sqrt(Math.pow(x[0] - y[0], 2) + Math.pow(x[1] - y[1], 2));
+              }
+              
+              // Training step
+              function trainStep() {
+                  // Get current training sample
+                  const x = trainingData[currentSampleIndex];
+                  
+                  // Forward pass
+                  const { h, y } = forwardPass(x);
+                  
+                  // Recirculation
+                  const hRec = recirculation(y);
+                  
+                  // Update weights
+                  updateWeights(x, h, hRec);
+                  
+                  // Calculate error
+                  const error = calculateError(x, y);
+                  
+                  // Update displays
+                  updateDisplays(x, y, error);
+                  
+                  // Move to next sample
+                  currentSampleIndex = (currentSampleIndex + 1) % trainingData.length;
+                  iterations++;
+                  
+                  return error;
+              }
+              
+              // Reset network
+              function resetNetwork() {
+                  W1 = [
+                      [Math.random() * 0.2 - 0.1], // 2×1 matrix
+                      [Math.random() * 0.2 - 0.1]
+                  ];
+                  
+                  W2 = [
+                      [Math.random() * 0.2 - 0.1], // 1×2 matrix
+                      [Math.random() * 0.2 - 0.1]
+                  ];
+                  
+                  iterations = 0;
+                  currentSampleIndex = 0;
+                  
+                  // Update displays
+                  const x = trainingData[currentSampleIndex];
+                  const { y } = forwardPass(x);
+                  const error = calculateError(x, y);
+                  updateDisplays(x, y, error);
+                  
+                  // Redraw network
+                  drawNetwork();
+              }
+              
+              // Update displays
+              function updateDisplays(x, y, error) {
+                  document.getElementById('errorDisplay').textContent = `Reconstruction Error: ${error.toFixed(4)}`;
+                  document.getElementById('iterationDisplay').textContent = `Iterations: ${iterations}`;
+                  document.getElementById('inputData').textContent = `[${x[0].toFixed(2)}, ${x[1].toFixed(2)}]`;
+                  document.getElementById('reconstructionData').textContent = `[${y[0].toFixed(2)}, ${y[1].toFixed(2)}]`;
+                  document.getElementById('weightsDisplay').textContent = 
+                      `W1:\n[${W1[0][0].toFixed(2)}]\n[${W1[1][0].toFixed(2)}]\n\n` +
+                      `W2:\n[${W2[0][0].toFixed(2)}]\n[${W2[1][0].toFixed(2)}]`;
+                  
+                  // Redraw network
+                  drawNetwork();
+              }
+              
+              // Draw network visualization
+              function drawNetwork() {
+                  const canvas = document.getElementById('networkCanvas');
+                  const ctx = canvas.getContext('2d');
+                  
+                  // Clear canvas
+                  ctx.clearRect(0, 0, canvas.width, canvas.height);
+                  
+                  // Node positions
+                  const inputX = 100;
+                  const hiddenX = 300;
+                  const outputX = 500;
+                  const nodeRadius = 20;
+                  const nodeSpacing = 80;
+                  
+                  // Draw nodes
+                  // Input layer (2 nodes)
+                  ctx.fillStyle = '#A0E7E5';
+                  for (let i = 0; i < 2; i++) {
+                      const y = 150 + (i - 0.5) * nodeSpacing;
+                      ctx.beginPath();
+                      ctx.arc(inputX, y, nodeRadius, 0, 2 * Math.PI);
+                      ctx.fill();
+                      ctx.stroke();
+                      
+                      // Node label
+                      ctx.fillStyle = 'black';
+                      ctx.textAlign = 'center';
+                      ctx.textBaseline = 'middle';
+                      ctx.font = '12px Arial';
+                      ctx.fillText(`x${i+1}`, inputX, y);
+                      ctx.fillStyle = '#A0E7E5';
+                  }
+                  
+                  // Hidden layer (1 node)
+                  ctx.fillStyle = '#FFAEBC';
+                  ctx.beginPath();
+                  ctx.arc(hiddenX, 150, nodeRadius, 0, 2 * Math.PI);
+                  ctx.fill();
+                  ctx.stroke();
+                  
+                  // Hidden node label
+                  ctx.fillStyle = 'black';
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'middle';
+                  ctx.font = '12px Arial';
+                  ctx.fillText('h', hiddenX, 150);
+                  
+                  // Output layer (2 nodes)
+                  ctx.fillStyle = '#B4F8C8';
+                  for (let i = 0; i < 2; i++) {
+                      const y = 150 + (i - 0.5) * nodeSpacing;
+                      ctx.beginPath();
+                      ctx.arc(outputX, y, nodeRadius, 0, 2 * Math.PI);
+                      ctx.fill();
+                      ctx.stroke();
+                      
+                      // Node label
+                      ctx.fillStyle = 'black';
+                      ctx.textAlign = 'center';
+                      ctx.textBaseline = 'middle';
+                      ctx.font = '12px Arial';
+                      ctx.fillText(`y${i+1}`, outputX, y);
+                      ctx.fillStyle = '#B4F8C8';
+                  }
+                  
+                  // Draw connections for 2→1→2 architecture
+                  // Input to hidden connections
+                  for (let i = 0; i < 2; i++) {
+                      const inputY = 150 + (i - 0.5) * nodeSpacing;
+                      const weight = W1[i][0];
+                      const lineWidth = Math.min(Math.abs(weight) * 5, 8);
+                      
+                      ctx.beginPath();
+                      ctx.moveTo(inputX + nodeRadius, inputY);
+                      ctx.lineTo(hiddenX - nodeRadius, 150);
+                      ctx.strokeStyle = weight >= 0 ? 'blue' : 'red';
+                      ctx.lineWidth = lineWidth;
+                      ctx.stroke();
+                  }
+                  
+                  // Hidden to output connections
+                  for (let i = 0; i < 2; i++) {
+                      const outputY = 150 + (i - 0.5) * nodeSpacing;
+                      const weight = W2[i][0];
+                      const lineWidth = Math.min(Math.abs(weight) * 5, 8);
+                      
+                      ctx.beginPath();
+                      ctx.moveTo(hiddenX + nodeRadius, 150);
+                      ctx.lineTo(outputX - nodeRadius, outputY);
+                      ctx.strokeStyle = weight >= 0 ? 'blue' : 'red';
+                      ctx.lineWidth = lineWidth;
+                      ctx.stroke();
+                  }
+                  
+                  // Reset stroke style
+                  ctx.strokeStyle = 'black';
+                  ctx.lineWidth = 1;
+              }
+              
+              // Event listeners
+              document.getElementById('trainStep').addEventListener('click', trainStep);
+              
+              document.getElementById('train100').addEventListener('click', function() {
+                  let totalError = 0;
+                  for (let i = 0; i < 100; i++) {
+                      totalError += trainStep();
+                  }
+                  console.log(`Average error after 100 steps: ${(totalError / 100).toFixed(4)}`);
+              });
+              
+              document.getElementById('reset').addEventListener('click', resetNetwork);
+              
+              // Initialize
+              resetNetwork();
+          </script>
+      
+    </div>
+
+
       <h2>Types of Autoencoders</h2>
       <p>There are several variations of autoencoders, each with specific applications:</p>
       
@@ -505,7 +827,7 @@
         <h3>Vanilla Autoencoder</h3>
         <p>The basic autoencoder architecture consists of an encoder and decoder with fully connected layers. The encoder compresses the input to a lower-dimensional code, and the decoder reconstructs the input from this code.</p>
         <div class="math-formula">
-          $$ \mathcal{L}(\theta) = \frac{1}{N}\sum_{i=1}^N ||x_i - g_\theta(f_\theta(x_i))||^2 $$
+          \[ \mathcal{L}(\theta) = \frac{1}{N}\sum_{i=1}^N \|\mathbf{x}_i - g_\theta(f_\theta(\mathbf{x}_i))\|^2 \]
           <p class="formula-caption">where \(f_\theta\) is the encoder and \(g_\theta\) is the decoder</p>
         </div>
       </div>
@@ -514,7 +836,7 @@
         <h3>Sparse Autoencoder</h3>
         <p>Sparse autoencoders add a sparsity constraint to the hidden layer, forcing the model to activate only a small number of neurons at a time. This encourages the model to learn more robust features.</p>
         <div class="math-formula">
-          $$ \mathcal{L}(\theta) = \frac{1}{N}\sum_{i=1}^N ||x_i - g_\theta(f_\theta(x_i))||^2 + \lambda \sum_{j=1}^m |\rho - \hat{\rho_j}| $$
+          \[ \mathcal{L}(\theta) = \frac{1}{N}\sum_{i=1}^N \|\mathbf{x}_i - g_\theta(f_\theta(\mathbf{x}_i))\|^2 + \lambda \sum_{j=1}^m |\rho - \hat{\rho_j}| \]
           <p class="formula-caption">where \(\rho\) is the target sparsity and \(\hat{\rho_j}\) is the average activation of hidden unit j</p>
         </div>
       </div>
@@ -523,8 +845,8 @@
         <h3>Denoising Autoencoder</h3>
         <p>Denoising autoencoders are trained to reconstruct clean inputs from corrupted versions. This makes them robust to noise and helps them learn more useful features.</p>
         <div class="math-formula">
-          $$ \mathcal{L}(\theta) = \frac{1}{N}\sum_{i=1}^N ||x_i - g_\theta(f_\theta(\tilde{x_i}))||^2 $$
-          <p class="formula-caption">where \(\tilde{x_i} = x_i + \epsilon\) is the corrupted input with noise \(\epsilon\)</p>
+          \[ \mathcal{L}(\theta) = \frac{1}{N}\sum_{i=1}^N \|\mathbf{x}_i - g_\theta(f_\theta(\tilde{\mathbf{x}}_i))\|^2 \]
+          <p class="formula-caption">where \(\tilde{\mathbf{x}}_i = \mathbf{x}_i + \epsilon\) is the corrupted input with noise \(\epsilon\)</p>
         </div>
       </div>
       
@@ -533,7 +855,7 @@
         <p>Variational autoencoders are probabilistic models that learn a latent variable model for the input data. Instead of encoding an input as a single point, they encode it as a distribution over the latent space.</p>
         <p>The VAE loss function has two components: the reconstruction loss and the KL divergence between the encoder's distribution and a prior distribution.</p>
         <div class="math-formula">
-          $$ \mathcal{L}(\phi, \theta, x) = -\mathbb{E}_{z \sim q_\phi(z|x)}[\log p_\theta(x|z)] + D_{KL}(q_\phi(z|x) || p(z)) $$
+          \[ \mathcal{L}(\phi, \theta, \mathbf{x}) = -\mathbb{E}_{\mathbf{z} \sim q_\phi(\mathbf{z}|\mathbf{x})}[\log p_\theta(\mathbf{x}|\mathbf{z})] + D_{\text{KL}}(q_\phi(\mathbf{z}|\mathbf{x}) \| p(\mathbf{z})) \]
         </div>
       </div>
       
@@ -541,113 +863,86 @@
         <h3>Convolutional Autoencoder</h3>
         <p>Convolutional autoencoders use convolutional layers in both the encoder and decoder, making them well-suited for image data.</p>
         <div class="math-formula">
-          $$ f_\theta(x) = \sigma(\text{Conv2D}(x) * W + b) $$
-          $$ g_\theta(z) = \sigma(\text{Conv2DTranspose}(z) * W' + b') $$
+          \[ f_\theta(\mathbf{x}) = \sigma(\text{Conv2D}(\mathbf{x}) \ast \mathbf{W} + \mathbf{b}) \]
+          \[ g_\theta(\mathbf{z}) = \sigma(\text{Conv2DTranspose}(\mathbf{z}) \ast \mathbf{W}' + \mathbf{b}') \]
           <p class="formula-caption">where \(W, W'\) are learnable filters and \(\sigma\) is an activation function</p>
         </div>
       </div>
-      
+
+      <p>For a comprehensive theoretical background on Autoencoders and Variational Autoencoders (VAEs), I highly recommend Chapter 14 and 20 of <a href="https://www.deeplearningbook.org/" target="_blank">Deep Learning</a> by Goodfellow, Bengio, and Courville.</p>
+
       <h2>Applications</h2>
-      <p>Autoencoders have a wide range of applications in machine learning and data science:</p>
-      
-      <ul>
-        <li><strong>Dimensionality Reduction:</strong> Autoencoders can compress high-dimensional data into a lower-dimensional representation while preserving important features.</li>
-        <li><strong>Anomaly Detection:</strong> By learning the normal patterns in data, autoencoders can identify anomalies as inputs with high reconstruction error.</li>
-        <li><strong>Image Denoising:</strong> Denoising autoencoders can remove noise from images by learning to reconstruct clean images from noisy ones.</li>
-        <li><strong>Feature Learning:</strong> The encoded representations can be used as features for downstream tasks like classification.</li>
-        <li><strong>Generative Modeling:</strong> Variational autoencoders can generate new data samples similar to the training data.</li>
-      </ul>
+      <p>Autoencoders serve multiple purposes in machine learning and data science. They excel at dimensionality reduction by compressing high-dimensional data while preserving key features. Their ability to learn normal data patterns makes them effective for anomaly detection through reconstruction error analysis. In image processing, denoising autoencoders can clean corrupted images. The encoded representations provide valuable features for downstream tasks like classification. Additionally, variants like variational autoencoders enable generative modeling, creating new data samples that mirror the training distribution.</p>
 
+      <p>Let's explore <strong>Variational Autoencoders</strong> (VAEs) and their fascinating applications in multimodal learning. For a rigorous mathematical treatment and detailed proofs, I highly recommend referring to <a href="https://arxiv.org/pdf/1606.05908" target="_blank">this seminal paper</a> on multimodal VAEs.</p>
 
-      <!-- Convex Interpolation in VAEs -->
+       <!-- Convex Interpolation in VAEs -->
 <section id="convex-interpolation">
-  <h2>Convex Interpolation in VAEs</h2>
+  <h2>Convex Interpolation in Variational Autoencoders</h2>
   <p>
-    I’ve found that in a VAE, because we force the latent variable \(z\) to follow a simple prior like \(p(z)=\mathcal{N}(0,I)\), the resulting latent space becomes (approximately) convex—any linear mix 
+    I’ve found that (obviously the researchers) in a VAE, because we force the latent variable \(z\) to follow a simple prior like \(p(z)=\mathcal{N}(0,I)\), the resulting latent space becomes (approximately) convex—any linear mix 
     \[
-      z_\alpha = (1-\alpha)\,z_1 + \alpha\,z_2,\quad \alpha\in[0,1]
+      \mathbf{z}_\alpha = (1-\alpha)\mathbf{z}_1 + \alpha\mathbf{z}_2,\quad \alpha\in[0,1]
     \]
-    stays in a high–density region where the decoder can produce meaningful outputs :contentReference[oaicite:0]{index=0}.
+    stays in a high–density region where the decoder can produce meaningful outputs .
   </p>
   <p>
-    Concretely, decoding \(z_\alpha\) via \(x_\alpha = g_\theta(z_\alpha)\) often yields smooth “in‑between” samples that semantically blend the endpoints :contentReference[oaicite:1]{index=1}.  
+    Concretely, decoding \(\mathbf{z}_\alpha\) via \(\mathbf{x}_\alpha = g_\theta(\mathbf{z}_\alpha)\) often yields smooth “in‑between” samples that semantically blend the endpoints .  
   </p>
   <p>
     However, naive latent interpolations can stray off the true data manifold, leading to artifacts. Recent work shapes the latent manifold to be locally convex—e.g., by adding a regularizer that encourages
     \[
-      \|g_\theta((1-\alpha)z_i + \alpha z_j) - ((1-\alpha)x_i + \alpha x_j)\|\;\text{to be small}
+      \|g_\theta((1-\alpha)\mathbf{z}_i + \alpha \mathbf{z}_j) - ((1-\alpha)\mathbf{x}_i + \alpha \mathbf{x}_j)\|\;\text{to be small}
     \]
-    for many \(\alpha\) :contentReference[oaicite:2]{index=2}.  
+    for many \(\alpha\) .  
   </p>
   <p>
-    Statisticians call evaluation inside the convex hull of training points “interpolation,” which is generally safer than extrapolating outside that hull :contentReference[oaicite:3]{index=3}.
-  </p>
-</section>
-
-<!-- Convex Interpolation in Variational Autoencoders -->
-<section id="vae-convex">
-  <h2>Convex Interpolation in Variational Autoencoders</h2>
-  <p>
-    I’ve learned that variational autoencoders (VAEs) impose a prior \(p(z)=\mathcal{N}(0,I)\) which causes the latent space to approximate a convex manifold, making linear combinations
-    \[
-      z_\alpha = (1-\alpha)\,z_1 + \alpha\,z_2,\quad \alpha\in[0,1]
-    \]
-    lie in regions where decoding yields meaningful outputs. :contentReference[oaicite:0]{index=0}
-  </p>
-  <p>
-    By decoding \(x_\alpha = g_\theta(z_\alpha)\), we obtain smooth interpolations that blend the semantic features of the endpoints. :contentReference[oaicite:1]{index=1}
-  </p>
-  <p>
-    However, naive interpolation can stray off the true data manifold and introduce artifacts; remedies include regularizers that encourage
-    \[
-      \bigl\|g_\theta((1-\alpha)z_i + \alpha z_j) - ((1-\alpha)x_i + \alpha x_j)\bigr\|
-    \]
-    to be small. :contentReference[oaicite:2]{index=2}
-  </p>
-  <p>
-    Such convexity constraints help align the latent manifold with the true data distribution, improving both interpolation quality and reconstruction fidelity. :contentReference[oaicite:3]{index=3}
+    Statisticians call evaluation inside the convex hull of training points “interpolation,” which is generally safer than extrapolating outside that hull .
   </p>
 </section>
 
 <!-- Insights from “Multimodal Generative Models for Scalable Weakly‑Supervised Learning” -->
-<section id="mvae-paper">
-  <h2>Insights from “Multimodal Generative Models for Scalable Weakly‑Supervised Learning”</h2>
+<section id="mvae-motivation">
+  <h2>Moving to multimodal generation</h2>
   <p>
-    Wu & Goodman introduce the Multimodal VAE (MVAE), which fuses any subset of \(M\) modalities via a product‑of‑experts encoder
-    \[
-      q_\phi\bigl(z \mid \{x^{(i)}\}_{i\in\mathcal{O}}\bigr)
-      \propto p(z)\,\prod_{i\in\mathcal{O}} q_{\phi_i}\bigl(z\mid x^{(i)}\bigr).
-    \] :contentReference[oaicite:4]{index=4}
+    By now you must have good the clue that the VAE is a generative model.
+    It can generate new data points by sampling from the latent space and decoding them back to the original space. 
+    This property is particularly useful in multimodal learning, where we want 
+    to generate data that combines information from multiple modalities.
+    A naive way to do this is to concatenate the latent variables from each modality and train a single VAE on the combined data.
+    However, this approach has several limitations:
   </p>
-  <p>
-    Their training objective generalizes the ELBO to multiple modalities:
-    \[
-      \mathcal{L}(\theta,\phi)
-      = \mathbb{E}_{q_\phi(z\mid x)}
-        \Bigl[\sum_{i=1}^M \log p_\theta\bigl(x^{(i)}\mid z\bigr)\Bigr]
-        \;-\;\mathrm{KL}\bigl(q_\phi(z\mid x)\,\|\,p(z)\bigr),
-    \]
-    balancing reconstruction across all modalities against regularization to the prior. :contentReference[oaicite:5]{index=5}
-  </p>
-  <p>
-    For Gaussian encoders \(q_i(z)=\mathcal{N}(\mu_i,\Sigma_i)\) and prior \(p(z)=\mathcal{N}(0,\Sigma_0)\), the PoE posterior remains Gaussian with
-    \[
-      \Sigma_*^{-1} = \Sigma_0^{-1} + \sum_{i\in\mathcal{O}} \Sigma_i^{-1},
-      \quad
-      \mu_* = \Sigma_* \Bigl(\sum_{i\in\mathcal{O}} \Sigma_i^{-1}\mu_i\Bigr),
-    \]
-    which sharpens as more modalities contribute. :contentReference[oaicite:6]{index=6}
-  </p>
-  <p>
-    They share decoder parameters \(p_\theta(x^{(i)}\mid z)\) across modalities, drastically reducing parameter count while matching state‑of‑the‑art on tasks like multimodal translation. :contentReference[oaicite:7]{index=7}
-  </p>
-  <p>
-    A sub‑sampled training paradigm alternates between fully‑observed examples (training both uni‑ and multimodal encoders) and partially‑observed examples (training each unimodal encoder), ensuring robustness to missing data. :contentReference[oaicite:8]{index=8}
-  </p>
-  <p>
-    Experiments on CelebA attributes, synthesized image‐transformation modalities, and bilingual translation confirm the MVAE’s ability to learn coherent joint representations under weak supervision. :contentReference[oaicite:9]{index=9}
-  </p>
+  <ul>
+    <li>It requires a large amount of labeled data for each modality, which is often not available.</li>
+    <li>It does not leverage the relationships between modalities, leading to suboptimal representations.</li>
+    <li>It can be computationally expensive and slow to train.</li>
+  </ul>
 </section>
+
+<!-- Insights from “Multimodal Generative Models for Scalable Weakly‑Supervised Learning” -->
+<div>
+  <h2>Insights from “Multimodal Generative Models for Scalable Weakly‑Supervised Learning”</h2>
+
+  <p>I first encountered the MVAE paper by Mike Wu and Noah Goodman when I was looking for a way to merge different data types—like images, text, and audio—into one shared hidden representation called <em>z</em>. In their approach, each modality’s encoder outputs a Gaussian “expert” over <em>z</em>, and they multiply those experts together along with a simple Gaussian prior. This trick, known as the product‑of‑experts (PoE), means that as I feed in more modalities, the combined Gaussian becomes tighter (its variance shrinks), so I become more confident about the value of <em>z</em> when I have richer information.</p>
+
+  <p>Behind the scenes, training the MVAE means maximizing a modified evidence lower bound (ELBO). On one hand, I want to reconstruct each modality from <em>z</em>, which pushes up the sum of log‑likelihoods for every modality. On the other hand, I add a KL divergence term that keeps my fused posterior close to the standard normal prior, preventing the model from becoming overconfident. To handle missing data, the authors alternate between fully observed examples—where all encoders and the PoE get updated—and partially observed examples—where only the single‑modality encoder for the available data is updated. This sub‑sampling trick makes sure I can still infer a sensible <em>z</em> even if some streams drop out.</p>
+
+  <p>An elegant aspect of MVAE is its shared decoder. Instead of building one large decoder per modality, they attach small “heads” for each output type to a single backbone network. This reduces the total number of parameters and forces the model to learn a core latent space that works across all data types. When I ran experiments on tasks like predicting CelebA attributes from face images and captions, or translating between English and French sentences, the MVAE matched or beat state‑of‑the‑art methods while using far fewer weights.</p>
+
+  <h3>How the Product‑of‑Experts Works</h3>
+  <p>Imagine I have a standard normal prior <em>p(z)=N(0,1)</em> and two modality encoders giving Gaussian posteriors: from an image encoder I get <em>N(μ₁=2, σ₁²=0.25)</em>, and from a text encoder I get <em>N(μ₂=4, σ₂²=1)</em>. To combine them, I convert variances into precisions (inverse variance): τ₀=1, τ₁=4, τ₂=1, so the total precision is τ*=6. That gives me a combined variance σ*²=1/6≈0.167. The fused mean is (τ₀⋅0 + τ₁⋅2 + τ₂⋅4)/(τ*) =12/6=2. So my product‑of‑experts posterior becomes <em>N(2, 0.167)</em>. Notice how 0.167 is smaller than each individual variance—that’s the sharpening effect of PoE when I have both modalities.</p>
+
+  <h3>Shared Decoder and Parameter Efficiency</h3>
+  <p>In the decoder, I use one neural network backbone and then branch off small heads for each modality. This means fewer total parameters compared to having a completely separate decoder per modality. Sharing parameters in this way ensures the latent code <em>z</em> captures features relevant to all data types, rather than letting each decoder learn its own private tricks.</p>
+
+  <h3>Training with Missing Data</h3>
+  <p>Real‑world datasets often have gaps, so MVAE trains on two kinds of examples. When all modalities are present, I update both the PoE encoder and every unimodal encoder. When only one modality is present, I update just that encoder. This alternation makes the model robust: it learns to fuse rich multimodal inputs and also to handle cases when only a single view is available.</p>
+
+  <h3>Results and Applications</h3>
+  <p>When I applied MVAE to tasks like face‑attribute prediction (CelebA), synthetic image transforms (e.g., rotations), and bilingual translation (English↔French), the model consistently learned a coherent joint representation. I could predict missing modalities and translate between them, all with fewer parameters than comparable methods.</p>
+
+  <p>Working through these ideas helped me see why product‑of‑experts sharpens uncertainty and why sharing decoders yields a compact, unified latent space. The sub‑sampling training trick then ties it all together, making MVAE a powerful tool for real‑world multimodal data that often arrives incomplete.</p>
+</div>
 
 
       <script>
@@ -675,13 +970,7 @@
       
 
       
-      <h2>Conclusion</h2>
-      <p>Autoencoders are powerful tools for unsupervised learning that can be applied to a wide range of problems. From simple linear autoencoders to complex variational models, they provide a flexible framework for learning representations of data.</p>
-      
-      <p>As we've seen, the mathematical principles behind autoencoders are elegant and provide insights into how they work. By understanding these principles, we can better design and apply autoencoders to solve real-world problems.</p>
-      
-      <p>In future posts, we'll explore more advanced topics like disentangled representations, adversarial autoencoders, and applications to specific domains like natural language processing and time series analysis.</p>
-    
+     
     </div>
   </article>
   </div>  
