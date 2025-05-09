@@ -2,7 +2,7 @@ I built this website to share my projects and thoughts with the machine learning
 
 You can read it from here: https://blog-page-lake-phi.vercel.app/autoencoder-blog.html or if the service is down, directly open the file `autoencoder-blog.html`.
 Appendix Notebook (code implementations): 
-Check the deployed version: 
+YouTube Explanation: 
 For codes check the notebooks provided, however in the blog notebook links are provided wherever required.
 
 ## What's on My Site
