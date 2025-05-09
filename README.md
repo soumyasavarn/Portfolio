@@ -4,7 +4,7 @@ You can read it from here: https://blog-page-lake-phi.vercel.app/autoencoder-blo
 
 Appendix Notebook (code implementations): https://www.kaggle.com/code/soumyasavarn/everything-about-autoencoders/notebook?scriptVersionId=238355572
 
-YouTube Explanation: 
+YouTube Explanation: https://youtu.be/ooex1U_E1lM?si=fLTPfQlrYNS03gUt
 
 For codes check the notebooks provided, however in the blog notebook links are provided wherever required.
 
