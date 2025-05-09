@@ -461,6 +461,25 @@ canvas {
     height: auto;
     margin: 10px 0;
 }
+
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+    margin: 24px 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+}
   </style> </head> <body> <div id="main" style="padding: 32px 15vw;"> <a href="index.html" class="back-btn">&larr; Back to Home</a>
   <article class="blog-post">
     <h1>Everything about Autoencoders: From Linear Algebra to its Multimodal and Cross-modal Generative Capabilities</h1>
@@ -471,7 +490,21 @@ canvas {
       <!-- Motivation -->
       <section id="motivation">
         <h2>Motivation</h2>
-        <p>My journey into generative models began with what seemed like an overwhelming field. However, my academic coursework in probability theory, Deep Learning, and Multimodal Data Processing provided the perfect foundation. Through this cumulative knowledge, I discovered that autoencoders offered an accessible entry point into understanding and working with Generative Multimodal models. I tried to build every concept from scratch, and you can watch this video for deeper insights into my research journey. It combines all my learning into a single comprehensive overview. Thanks to my Multimodal Data Processing course project for rekindling my passion for sharing knowledge online!</p>
+        <p>My journey into generative models began with what seemed like an overwhelming field. However, my academic coursework in probability theory, Deep Learning, and Multimodal Data Processing provided the perfect foundation. Through this cumulative knowledge, I discovered that autoencoders offered an accessible entry point into understanding and working with Generative Multimodal models. I tried to build every concept from scratch, and you can watch these videos for deeper insights into my research journey:</p>
+        
+        <div class="video-container">
+          <iframe 
+            width="100%" 
+            height="400" 
+            src="https://www.youtube.com/embed/ooex1U_E1lM?si=fLTPfQlrYNS03gUt" 
+            title="Understanding Autoencoders" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+          </iframe>
+        </div>
+
+        <p>These videos combine all my learning into a comprehensive overview. Thanks to my Multimodal Data Processing course project for rekindling my passion for sharing knowledge online!</p>
       </section>
 
       <!-- Historical Perspective -->
