@@ -13,7 +13,7 @@ For codes check the notebooks provided, however in the blog notebook links are p
 - **About Me**: Learn about my background and interests through the sliding sidebar
 - **My Blog**: Read my articles on AI and programming topics
 - **My Projects**: Check out my top coding projects with links to GitHub
-- **Work Experience**: Coming Soon
+- **Work Experience**: Added some relevant work experience.
 
 ## Featured Blog: Everything about Autoencoders
 
