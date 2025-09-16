@@ -1,6 +1,6 @@
 Portfolio website link: https://portfolio-soumya-savarn.vercel.app/index.html
 
-You can copy the template for creating your own portfolio. As of now, it includes Google Search Engine verification and web crawler support. Try searching Soumya Savarn on Google (Page rank 1 and 3rd link as of September 4, 2025).  
+You can copy the template for creating your own portfolio. As of now, it includes Google Search Engine verification and web crawler support. Try searching Soumya Savarn on Google (Page rank 1 and 3rd link as of September 4, 2025), idk what's wrong with Bing.  
 
 I built this website to share my projects and thoughts with the machine learning community. DA323: Multimodal Data Processing 2, taught by Prof. Neeraj Sharma, inspired me to start sharing my knowledge through this platform. The course motivated me to write my first featured blog post on Autoencoders and their usage in multimodal generative models.
 
